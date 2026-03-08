@@ -1,0 +1,53 @@
+import * as React from "react";
+import { cn } from "./cn";
+
+export type ButtonVariant = "primary" | "ghost" | "outline" | "pill";
+export type ButtonSize = "sm" | "md" | "lg" | "icon";
+
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  size?: ButtonSize;
+  loading?: boolean;
+}
+
+const baseClasses =
+  "inline-flex items-center justify-center rounded-[14px] font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#4C8DFF] disabled:opacity-60 disabled:cursor-not-allowed gap-2";
+
+const sizeClasses: Record<ButtonSize, string> = {
+  sm: "h-8 px-3 text-xs",
+  md: "h-9 px-3.5 text-sm",
+  lg: "h-11 px-4 text-sm",
+  icon: "h-9 w-9 text-sm",
+};
+
+const variantClasses: Record<ButtonVariant, string> = {
+  primary:
+    "bg-[#4C8DFF] text-white hover:bg-[#3778F6] shadow-[0_16px_30px_rgba(76,141,255,0.28)]",
+  ghost:
+    "bg-transparent text-[#101828] hover:bg-[#EAF2FF] border border-transparent",
+  outline:
+    "bg-white text-[#101828] border border-[#E6ECF5] hover:bg-[#F8FAFD]",
+  pill: "rounded-full bg-[#111111] text-white hover:bg-black",
+};
+
+export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
+  ({ className, variant = "primary", size = "md", loading, children, ...props }, ref) => {
+    return (
+      <button
+        ref={ref}
+        className={cn(baseClasses, sizeClasses[size], variantClasses[variant], className)}
+        disabled={loading || props.disabled}
+        {...props}
+      >
+        {loading && (
+          <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+        )}
+        {children}
+      </button>
+    );
+  }
+);
+
+Button.displayName = "Button";
+

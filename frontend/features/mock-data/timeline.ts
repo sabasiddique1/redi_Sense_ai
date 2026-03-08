@@ -1,0 +1,47 @@
+export const mockTimelineEvents = [
+  {
+    id: "1",
+    type: "report",
+    date: "2025-03-08",
+    time: "08:12",
+    title: "CT chest w/ contrast uploaded",
+    detail: "Follow-up right upper lobe nodule",
+    findings: [
+      "Interval enlargement 8mm → 12mm",
+      "Spiculation, increased density",
+      "Recommend PET-CT, thoracic surgery",
+    ],
+  },
+  {
+    id: "2",
+    type: "medication",
+    date: "2025-03-01",
+    time: "14:00",
+    title: "Medication change",
+    detail: "Atorvastatin increased to 20mg nightly",
+  },
+  {
+    id: "3",
+    type: "symptom",
+    date: "2025-02-28",
+    time: "10:30",
+    title: "Symptom check — cough",
+    detail: "Intermittent dry cough x 2 weeks. No fever, no hemoptysis.",
+  },
+  {
+    id: "4",
+    type: "report",
+    date: "2025-02-20",
+    time: "09:00",
+    title: "CXR — stable",
+    detail: "No interval change. Nodule stable at 8mm.",
+  },
+  {
+    id: "5",
+    type: "finding",
+    date: "2025-02-15",
+    time: "11:00",
+    title: "AI summary accepted",
+    detail: "ReportIQ summary attached to prior CT report.",
+  },
+];

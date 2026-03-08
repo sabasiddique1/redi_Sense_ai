@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Fonts */
+  --font-sans: var(--font-inter);
+
+  /* App colors */
+  --color-app-background: #f4f7fb;
+  --color-app-foreground: #101828;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafd;
+  --color-border-subtle: #e6ecf5;
+  --color-text-primary: #101828;
+  --color-text-secondary: #667085;
+
+  --color-primary: #4c8dff;
+  --color-primary-soft: #eaf2ff;
+  --color-primary-hover: #3778f6;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+
+  --color-pill-active: #111111;
+
+  /* Radii */
+  --radius-shell: 28px;
+  --radius-card: 20px;
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 8px;
+
+  /* Shadows */
+  --shadow-soft:
+    0 18px 45px rgba(15, 23, 42, 0.04),
+    0 2px 8px rgba(15, 23, 42, 0.02);
+}
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-color: var(--color-app-background);
+  color: var(--color-app-foreground);
+  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background-color: var(--color-app-background);
+}
+
+.card-surface {
+  background-color: var(--color-surface);
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-soft);
+}
+
+.pill-nav {
+  border-radius: 999px;
+  background-color: #f2f4f7;
+}
+
+.pill-nav-item {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  line-height: 1.2;
+  color: var(--color-text-secondary);
+}
+
+.pill-nav-item-active {
+  background-color: var(--color-pill-active);
+  color: #ffffff;
+}
