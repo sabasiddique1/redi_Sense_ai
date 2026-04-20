@@ -1,0 +1,18 @@
+[
+  {
+    "query": "pulmonary nodule follow up",
+    "expected_titles": ["Pulmonary Nodule Follow-up Primer"]
+  },
+  {
+    "query": "chest pain arm radiation diaphoresis",
+    "expected_titles": ["Chest Pain Escalation Checklist"]
+  },
+  {
+    "query": "clinical decision support safety",
+    "expected_titles": ["Clinical Decision Support Safety Notes"]
+  },
+  {
+    "query": "pneumonia fever cough dyspnea",
+    "expected_titles": ["Pneumonia Initial Evaluation Notes"]
+  }
+]

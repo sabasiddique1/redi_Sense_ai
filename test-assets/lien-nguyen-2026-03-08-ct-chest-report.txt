@@ -1,0 +1,27 @@
+Patient Name: Lien Nguyen
+MRN: 184920
+DOB: 1968-03-15
+Sex: Female
+Ordering Clinician: Dr. A. Hernandez
+Exam Date: 2026-03-08
+Study: CT Chest With Contrast
+
+Clinical Indication:
+Follow-up of known right upper lobe pulmonary nodule.
+
+Comparison:
+Chest radiograph from 2026-02-20 and prior CT imaging.
+
+Findings:
+Right upper lobe pulmonary nodule now measures 12 mm, previously 8 mm.
+Subtle spiculation and increased density are present.
+No pleural effusion, focal air-space consolidation, or pneumothorax.
+Cardiomediastinal silhouette is not enlarged.
+
+Impression:
+1. Interval enlargement of the right upper lobe pulmonary nodule from 8 mm to 12 mm.
+2. Suspicious morphology with subtle spiculation.
+3. Recommend PET-CT and thoracic surgery consultation.
+
+Signed electronically by:
+Dr. A. Hernandez

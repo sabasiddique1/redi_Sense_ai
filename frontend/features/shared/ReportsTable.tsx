@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { FileText } from "lucide-react";
 
 export interface ReportRow {
   id: string;
@@ -20,22 +21,25 @@ const riskTone: Record<ReportRow["risk"], { bg: string; text: string }> = {
 
 export function ReportsTable({ reports }: { reports: ReportRow[] }) {
   return (
-    <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-      <CardHeader className="pb-2">
+    <Card className="flex max-h-[320px] flex-col rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+      <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center justify-between gap-2">
-          <div>
+          <div className="flex items-center gap-2">
+            <FileText className="h-4 w-4 shrink-0 text-[#4C8DFF]" />
+            <div>
             <CardTitle>Reports queue</CardTitle>
             <p className="mt-0.5 text-[11px] text-[#667085]">
               Prioritized by AI risk assessment and red flags.
             </p>
+            </div>
           </div>
           <span className="text-[11px] text-[#98A2B3]">
             {reports.length} in queue
           </span>
         </div>
       </CardHeader>
-      <CardContent className="pt-0">
-        <div className="overflow-hidden rounded-[16px] border border-[#E6ECF5] bg-white">
+      <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
+        <div className="h-full max-h-[220px] overflow-y-auto rounded-[16px] border border-[#E6ECF5] bg-white">
           <table className="min-w-full border-collapse text-xs">
             <thead className="bg-[#F8FAFD]">
               <tr className="text-[11px] text-[#667085]">

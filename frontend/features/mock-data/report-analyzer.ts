@@ -4,7 +4,7 @@ export const mockReportAnalysis = {
   category: "Radiology — Pulmonary nodule (suspicious)",
   confidence: 94,
   plainLanguageSummary:
-    "The CT shows a lung nodule that has grown from 8mm to 12mm since the last scan. The nodule has developed spiculation, which can be a sign of cancer. The radiologist recommends further imaging and a surgical consultation.",
+    "The CT describes a lung nodule that has grown from 8mm to 12mm since the last scan. The spiculated appearance can be associated with malignancy, and the radiologist recommends further imaging and surgical consultation.",
   topKeywords: [
     "nodule",
     "enlargement",

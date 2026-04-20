@@ -1,0 +1,12 @@
+{
+  "name": "clin-assist-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix frontend run dev",
+    "build": "npm --prefix frontend run build",
+    "lint": "npm --prefix frontend run lint",
+    "test": "npm --prefix frontend run test",
+    "typecheck": "npm --prefix frontend run typecheck"
+  }
+}

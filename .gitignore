@@ -1,0 +1,108 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# =========================
+# Frontend dependencies
+# =========================
+/frontend/node_modules
+/frontend/.pnp
+/frontend/.pnp.*
+/frontend/.yarn/*
+!/frontend/.yarn/patches
+!/frontend/.yarn/plugins
+!/frontend/.yarn/releases
+!/frontend/.yarn/versions
+
+# =========================
+# Frontend testing / build
+# =========================
+/frontend/coverage
+/frontend/.next/
+/frontend/out/
+/frontend/build
+/frontend/*.tsbuildinfo
+
+# =========================
+# Backend Python
+# =========================
+/backend/__pycache__/
+/backend/**/*.py[cod]
+/backend/*.db
+/backend/*.sqlite3
+
+# Virtual environments
+/backend/env/
+/backend/venv/
+/backend/.venv/
+
+# Python caches / tooling
+/backend/.pytest_cache/
+/backend/.mypy_cache/
+/backend/.cache/
+/backend/alembic/__pycache__/
+/backend/scripts/__pycache__/
+/backend/tests/__pycache__/
+
+# =========================
+# Environment files
+# =========================
+.env*
+/backend/.env*
+/frontend/.env*
+
+# =========================
+# Project generated files
+# =========================
+/backend/storage/uploads/
+/backend/reportiq.db
+
+# Optional: ignore local sample/generated data
+/backend/evals/sample_data/
+
+# =========================
+# Logs / debug
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+*.log
+
+# =========================
+# Misc
+# =========================
+.DS_Store
+Thumbs.db
+*.pem
+*.tmp
+*.swp
+
+# =========================
+# Tooling / deployment
+# =========================
+/frontend/.vercel
+.vscode/
+.idea/
+
+# Root virtual env / caches
+/.venv/
+/.mypy_cache/
+/.pytest_cache/
+/.cache/
+
+# Root uploads
+/storage/uploads/
+
+# Frontend local build cache
+/frontend/.turbo/
+
+# Archives
+*.zip
+
+# Python cache anywhere
+__pycache__/
+*.py[cod]
+
+# Local DBs anywhere
+*.db
+*.sqlite3frontend.zip
+frontend.zip

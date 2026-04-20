@@ -1,126 +1,289 @@
-from datetime import datetime
+from __future__ import annotations
 
-from sqlalchemy import (
-  Column,
-  Date,
-  DateTime,
-  Enum,
-  ForeignKey,
-  Integer,
-  String,
-  Text,
-)
-from sqlalchemy.orm import relationship, Mapped
+from datetime import date, datetime
+from typing import Any
+
+from sqlalchemy import Date, DateTime, ForeignKey, Index, Integer, String, Text, func, text
+from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .database import Base
-
-
-class User(Base):
-  __tablename__ = "users"
-
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  auth0_sub: Mapped[str] = Column(String(255), unique=True, index=True)
-  email: Mapped[str | None] = Column(String(255), index=True, nullable=True)
-  name: Mapped[str | None] = Column(String(255), nullable=True)
-  created_at: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow
-  )
-
-  patients = relationship("Patient", back_populates="owner")
+from .types import VectorType
 
 
 class Patient(Base):
   __tablename__ = "patients"
 
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  owner_id: Mapped[int | None] = Column(Integer, ForeignKey("users.id"))
-  name: Mapped[str] = Column(String(255))
-  dob: Mapped[datetime | None] = Column(Date, nullable=True)
-  gender: Mapped[str | None] = Column(String(50), nullable=True)
-  created_at: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  mrn: Mapped[str | None] = mapped_column(String(64), unique=True, nullable=True)
+  name: Mapped[str] = mapped_column(String(255))
+  dob: Mapped[date | None] = mapped_column(Date, nullable=True)
+  gender: Mapped[str | None] = mapped_column(String(50), nullable=True)
+  primary_clinician: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  history_summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+  ai_notes: Mapped[str | None] = mapped_column(Text, nullable=True)
+  allergies: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  conditions: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  medications: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  alerts: Mapped[list[dict[str, Any]]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  tasks: Mapped[list[dict[str, Any]]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  profile_metadata: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+  updated_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=func.now(),
+    nullable=False,
   )
 
-  owner = relationship("User", back_populates="patients")
-  reports = relationship("MedicalReport", back_populates="patient")
-  triage_sessions = relationship("TriageSession", back_populates="patient")
-  timeline_events = relationship("TimelineEvent", back_populates="patient")
-
-
-class MedicalReport(Base):
-  __tablename__ = "medical_reports"
-
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  patient_id: Mapped[int] = Column(Integer, ForeignKey("patients.id"))
-  report_text: Mapped[str] = Column(Text)
-  classification: Mapped[str | None] = Column(String(255), nullable=True)
-  created_at: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow
+  reports: Mapped[list["Report"]] = relationship(
+    back_populates="patient",
+    cascade="all, delete-orphan",
+    order_by="desc(Report.created_at)",
+  )
+  triage_sessions: Mapped[list["TriageSession"]] = relationship(
+    back_populates="patient",
+    cascade="all, delete-orphan",
+    order_by="desc(TriageSession.created_at)",
+  )
+  timeline_events: Mapped[list["TimelineEvent"]] = relationship(
+    back_populates="patient",
+    cascade="all, delete-orphan",
+    order_by="desc(TimelineEvent.timestamp)",
+  )
+  copilot_conversations: Mapped[list["CopilotConversation"]] = relationship(
+    back_populates="patient",
+    cascade="all, delete-orphan",
+    order_by="desc(CopilotConversation.updated_at)",
   )
 
-  patient = relationship("Patient", back_populates="reports")
-  ai_responses = relationship("AIResponse", back_populates="report")
+
+class Report(Base):
+  __tablename__ = "reports"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  patient_id: Mapped[int | None] = mapped_column(
+    ForeignKey("patients.id", ondelete="SET NULL"), nullable=True, index=True
+  )
+  title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  modality: Mapped[str | None] = mapped_column(String(100), nullable=True)
+  source_filename: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  mime_type: Mapped[str | None] = mapped_column(String(100), nullable=True)
+  file_size_bytes: Mapped[int | None] = mapped_column(Integer, nullable=True)
+  report_text: Mapped[str] = mapped_column(Text)
+  classification: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  summary: Mapped[str | None] = mapped_column(Text, nullable=True)
+  key_findings: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  structured_data: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  analysis_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+  analysis_source: Mapped[str | None] = mapped_column(String(50), nullable=True)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
+  patient: Mapped["Patient | None"] = relationship(back_populates="reports")
 
 
 class TriageSession(Base):
   __tablename__ = "triage_sessions"
 
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  patient_id: Mapped[int | None] = Column(Integer, ForeignKey("patients.id"))
-  symptoms: Mapped[str] = Column(Text)
-  risk_level: Mapped[str | None] = Column(String(50), nullable=True)
-  created_at: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  patient_id: Mapped[int | None] = mapped_column(
+    ForeignKey("patients.id", ondelete="SET NULL"), nullable=True, index=True
+  )
+  symptoms: Mapped[str] = mapped_column(Text)
+  risk_level: Mapped[str] = mapped_column(String(50))
+  red_flags: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  recommended_action: Mapped[str] = mapped_column(Text)
+  summary: Mapped[str] = mapped_column(Text)
+  differential: Mapped[list[str]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  analysis_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+  analysis_source: Mapped[str | None] = mapped_column(String(50), nullable=True)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
   )
 
-  patient = relationship("Patient", back_populates="triage_sessions")
-  ai_responses = relationship("AIResponse", back_populates="triage_session")
+  patient: Mapped["Patient | None"] = relationship(back_populates="triage_sessions")
 
 
 class TimelineEvent(Base):
   __tablename__ = "timeline_events"
 
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  patient_id: Mapped[int] = Column(Integer, ForeignKey("patients.id"))
-  event_type: Mapped[str] = Column(String(50))
-  description: Mapped[str] = Column(Text)
-  timestamp: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow, index=True
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  patient_id: Mapped[int] = mapped_column(
+    ForeignKey("patients.id", ondelete="CASCADE"), nullable=False, index=True
+  )
+  event_type: Mapped[str] = mapped_column(String(100), index=True)
+  title: Mapped[str] = mapped_column(String(255))
+  summary: Mapped[str] = mapped_column(Text)
+  event_metadata: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  timestamp: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), index=True, nullable=False
   )
 
-  patient = relationship("Patient", back_populates="timeline_events")
+  patient: Mapped["Patient"] = relationship(back_populates="timeline_events")
 
 
-class AIResponse(Base):
-  __tablename__ = "ai_responses"
+class CopilotConversation(Base):
+  __tablename__ = "copilot_conversations"
 
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  user_id: Mapped[int | None] = Column(Integer, ForeignKey("users.id"))
-  report_id: Mapped[int | None] = Column(Integer, ForeignKey("medical_reports.id"))
-  triage_session_id: Mapped[int | None] = Column(
-    Integer, ForeignKey("triage_sessions.id")
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  patient_id: Mapped[int | None] = mapped_column(
+    ForeignKey("patients.id", ondelete="SET NULL"), nullable=True, index=True
   )
-  role: Mapped[str] = Column(String(50))  # e.g. report_analysis, triage, summary
-  request_text: Mapped[str] = Column(Text)
-  response_text: Mapped[str] = Column(Text)
-  created_at: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow
+  title: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+  updated_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True),
+    server_default=func.now(),
+    onupdate=func.now(),
+    nullable=False,
   )
 
-  report = relationship("MedicalReport", back_populates="ai_responses")
-  triage_session = relationship("TriageSession", back_populates="ai_responses")
-
-
-class AuditLog(Base):
-  __tablename__ = "audit_logs"
-
-  id: Mapped[int] = Column(Integer, primary_key=True, index=True)
-  user_id: Mapped[int | None] = Column(Integer, ForeignKey("users.id"))
-  action: Mapped[str] = Column(String(255))
-  resource_type: Mapped[str | None] = Column(String(100), nullable=True)
-  resource_id: Mapped[str | None] = Column(String(100), nullable=True)
-  timestamp: Mapped[datetime] = Column(
-    DateTime(timezone=True), default=datetime.utcnow, index=True
+  patient: Mapped["Patient | None"] = relationship(back_populates="copilot_conversations")
+  messages: Mapped[list["CopilotMessage"]] = relationship(
+    back_populates="conversation",
+    cascade="all, delete-orphan",
+    order_by="CopilotMessage.created_at",
   )
-  detail: Mapped[str | None] = Column(Text, nullable=True)
 
+
+class CopilotMessage(Base):
+  __tablename__ = "copilot_messages"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  conversation_id: Mapped[int] = mapped_column(
+    ForeignKey("copilot_conversations.id", ondelete="CASCADE"),
+    nullable=False,
+    index=True,
+  )
+  patient_id: Mapped[int | None] = mapped_column(
+    ForeignKey("patients.id", ondelete="SET NULL"), nullable=True, index=True
+  )
+  role: Mapped[str] = mapped_column(String(50))
+  content: Mapped[str] = mapped_column(Text)
+  citations: Mapped[list[dict[str, Any]]] = mapped_column(
+    JSONB,
+    default=list,
+    server_default=text("'[]'::jsonb"),
+  )
+  message_metadata: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
+  conversation: Mapped["CopilotConversation"] = relationship(back_populates="messages")
+
+
+class EvidenceDocument(Base):
+  __tablename__ = "evidence_documents"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  source_key: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+  title: Mapped[str] = mapped_column(String(255))
+  source: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+  document_metadata: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
+  chunks: Mapped[list["EvidenceChunk"]] = relationship(
+    back_populates="document",
+    cascade="all, delete-orphan",
+    order_by="EvidenceChunk.chunk_index",
+  )
+
+
+class EvidenceChunk(Base):
+  __tablename__ = "evidence_chunks"
+
+  id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+  document_id: Mapped[int] = mapped_column(
+    ForeignKey("evidence_documents.id", ondelete="CASCADE"),
+    nullable=False,
+    index=True,
+  )
+  chunk_index: Mapped[int] = mapped_column(Integer, nullable=False)
+  section: Mapped[str | None] = mapped_column(String(255), nullable=True)
+  page: Mapped[int | None] = mapped_column(Integer, nullable=True)
+  content: Mapped[str] = mapped_column(Text)
+  # search_text denormalizes title/section/content for indexed lexical retrieval.
+  search_text: Mapped[str] = mapped_column(
+    Text,
+    default="",
+    server_default=text("''"),
+    nullable=False,
+  )
+  content_hash: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+  embedding: Mapped[str] = mapped_column(VectorType(1536), nullable=False)
+  chunk_metadata: Mapped[dict[str, Any]] = mapped_column(
+    JSONB,
+    default=dict,
+    server_default=text("'{}'::jsonb"),
+  )
+  created_at: Mapped[datetime] = mapped_column(
+    DateTime(timezone=True), server_default=func.now(), nullable=False
+  )
+
+  document: Mapped["EvidenceDocument"] = relationship(back_populates="chunks")
+
+  __table_args__ = (
+    Index("ix_evidence_chunks_document_chunk", "document_id", "chunk_index"),
+  )

@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ReportIQ Frontend (Next.js)
 
-## Getting Started
+This folder contains the **ReportIQ** web UI built with **Next.js App Router** + **Tailwind CSS**.
 
-First, run the development server:
+## Run locally
 
 ```bash
+cd frontend
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+From the repo root, `npm run dev`, `npm run lint`, `npm run test`, and `npm run typecheck` proxy into this frontend workspace.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Configuration
 
-## Learn More
+- **Backend API base URL**: set `NEXT_PUBLIC_API_BASE_URL` (defaults to `http://localhost:8000`).
 
-To learn more about Next.js, take a look at the following resources:
+Example:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+export NEXT_PUBLIC_API_BASE_URL="http://localhost:8000"
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## How the UI behaves without the backend
 
-## Deploy on Vercel
+Most screens attempt to call the backend, but **fall back to built-in mock data** if the API is unavailable.
+That means you can demo the UI without running Postgres/OpenAI.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Pages
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `/` — Dashboard (risk snapshot + queue + alerts)
+- `/report-analyzer` — Report analysis (calls `POST /api/report/analyze`)
+- `/symptom-triage` — Symptom triage (calls `POST /api/triage/analyze`)
+- `/knowledge-center` — Evidence search (calls `GET /api/evidence/search`)
+- `/patient-profile` — Patient overview (currently mock-only)
+- `/timeline` — Patient timeline (calls `GET /api/patient/1/timeline`)
+- `/settings` — Integrations/settings placeholders

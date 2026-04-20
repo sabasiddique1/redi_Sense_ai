@@ -1,4 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Activity } from "lucide-react";
 
 export interface RecentActivityItem {
   id: string;
@@ -13,11 +14,14 @@ export function RecentActivityPanel({
   items: RecentActivityItem[];
 }) {
   return (
-    <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-      <CardHeader className="pb-2">
-        <CardTitle>Recent activity</CardTitle>
+    <Card className="flex max-h-[260px] flex-col rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+      <CardHeader className="shrink-0 pb-2">
+        <div className="flex items-center gap-2">
+          <Activity className="h-4 w-4 shrink-0 text-[#4C8DFF]" />
+          <CardTitle>Recent activity</CardTitle>
+        </div>
       </CardHeader>
-      <CardContent className="space-y-2 pt-0">
+      <CardContent className="min-h-0 flex-1 space-y-2 overflow-y-auto pt-0">
         {items.map((item) => (
           <div
             key={item.id}

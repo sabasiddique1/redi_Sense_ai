@@ -60,6 +60,12 @@ body {
   background-color: var(--color-app-background);
 }
 
+/* Rounded app container: always full viewport height, content scrolls inside */
+.app-shell-inner {
+  height: calc(100vh - 2rem) !important;
+  min-height: calc(100vh - 2rem) !important;
+}
+
 .card-surface {
   background-color: var(--color-surface);
   border-radius: var(--radius-card);
