@@ -39,7 +39,7 @@ const summary: DashboardSummaryResponse = {
       severity: "Critical",
     },
   ],
-  ai_insight: { id: "i", title: "T", summary: "S", confidence: 100 },
+  ai_insight: { id: "i", title: "T", summary: "S", confidence: 100, record_count: 5 },
   risk_distribution: [
     { label: "Low", value: 4 },
     { label: "Moderate", value: 1 },
@@ -69,6 +69,12 @@ test("dashboard view model maps the backend summary onto the shared card props",
   assert.equal(view.reportsQueue[0]?.risk, "High");
   assert.equal(view.urgentAlerts[0]?.patientName, "Samir Ali");
   assert.equal(view.aiInsight.confidence, 100);
+  assert.equal(view.aiInsight.basis, "Based on 5 records");
+  assert.equal(
+    mapDashboardSummary({ ...summary, ai_insight: { ...summary.ai_insight, record_count: null } }, now)
+      .aiInsight.basis,
+    undefined,
+  );
   assert.deepEqual(
     view.riskDistribution.map((bucket) => bucket.value),
     [4, 1, 0, 2],

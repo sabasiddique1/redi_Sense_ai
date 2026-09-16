@@ -132,6 +132,7 @@ class DashboardSummaryServiceTests(unittest.TestCase):
     self.assertEqual(len(summary["recent_activity"]), 6)
     self.assertEqual(summary["recent_activity"][0]["label"], "Event 0")
     self.assertEqual(summary["ai_insight"]["confidence"], 100)
+    self.assertEqual(summary["ai_insight"]["record_count"], 6)  # 3 reports + 3 triage sessions
     self.assertIn("50%", summary["ai_insight"]["title"])
 
   def test_summary_handles_empty_database(self):
@@ -142,6 +143,7 @@ class DashboardSummaryServiceTests(unittest.TestCase):
     self.assertEqual(sum(b["value"] for b in summary["risk_distribution"]), 0)
     self.assertEqual(summary["ai_insight"]["id"], "insight-empty")
     self.assertEqual(summary["ai_insight"]["confidence"], 0)
+    self.assertEqual(summary["ai_insight"]["record_count"], 0)
 
 
 class DashboardSummaryRouteTests(unittest.TestCase):

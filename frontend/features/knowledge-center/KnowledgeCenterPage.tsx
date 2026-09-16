@@ -48,7 +48,7 @@ function modeLabel(mode: ResultMode): string {
 }
 
 export function KnowledgeCenterPage() {
-  const { demoMode } = useAppState();
+  const { demoMode, hydrated } = useAppState();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<EvidenceItem[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -120,13 +120,16 @@ export function KnowledgeCenterPage() {
 
   // Deep links from result views arrive as /knowledge-center?query=...; run once on mount.
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
     const initial = new URLSearchParams(window.location.search).get("query");
     if (initial && initial.trim()) {
       setQuery(initial);
       void runSearch(initial);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [hydrated]);
 
   return (
     <div className="space-y-5">

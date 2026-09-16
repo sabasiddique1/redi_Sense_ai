@@ -79,14 +79,19 @@ export function TimelinePage() {
     selectedPatientId,
     activityVersion,
     lastActivityMessage,
+    hydrated,
   } = useAppState();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<ResultMode>("real");
 
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
     if (!selectedPatientId) {
+      setLoading(false);
       return;
     }
 
@@ -129,7 +134,7 @@ export function TimelinePage() {
     return () => {
       cancelled = true;
     };
-  }, [activityVersion, demoMode, selectedPatientId]);
+  }, [activityVersion, demoMode, selectedPatientId, hydrated]);
 
   const visibleEvents = selectedPatientId ? events : [];
 

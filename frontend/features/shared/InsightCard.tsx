@@ -7,6 +7,8 @@ export interface Insight {
   title: string;
   summary: string;
   confidence: number;
+  /** Overrides the "N% confidence" badge, e.g. "Based on 12 records" for connected data. */
+  basis?: string;
 }
 
 export function InsightCard({ insight }: { insight: Insight }) {
@@ -19,7 +21,7 @@ export function InsightCard({ insight }: { insight: Insight }) {
             <CardTitle>AI signal of the day</CardTitle>
           </div>
           <Badge className="bg-primary-soft text-[10px] text-primary-strong">
-            {insight.confidence}% confidence
+            {insight.basis ?? `${insight.confidence}% confidence`}
           </Badge>
         </div>
       </CardHeader>

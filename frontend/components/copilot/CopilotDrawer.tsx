@@ -104,7 +104,7 @@ export function CopilotDrawer({
   open: boolean;
   onClose: () => void;
 }) {
-  const { demoMode, selectedPatient, selectedPatientId, notifyPatientActivity } = useAppState();
+  const { demoMode, selectedPatient, selectedPatientId, notifyPatientActivity, hydrated } = useAppState();
   const [activeConversationId, setActiveConversationId] = useState<number | null>(null);
   const [input, setInput] = useState("");
   const [draftMessages, setDraftMessages] = useState<CopilotMessage[]>([]);
@@ -138,7 +138,7 @@ export function CopilotDrawer({
   }, [demoMode, selectedPatientId]);
 
   useEffect(() => {
-    if (!open) {
+    if (!open || !hydrated) {
       return;
     }
 
@@ -177,7 +177,7 @@ export function CopilotDrawer({
     return () => {
       cancelled = true;
     };
-  }, [demoMode, open, selectedPatientId]);
+  }, [demoMode, open, selectedPatientId, hydrated]);
 
   useEffect(() => {
     if (draftMessages.length > 0) {

@@ -188,7 +188,7 @@ export function buildDemoDashboardSummary(): DashboardSummaryResponse {
       detail: alert.detail,
       severity: alert.severity,
     })),
-    ai_insight: { ...data.aiInsight },
+    ai_insight: { ...data.aiInsight, record_count: null },
     risk_distribution: data.riskDistribution
       .filter((bucket): bucket is RiskBucket & { label: DashboardRiskLevel } =>
         (RISK_LEVELS as string[]).includes(bucket.label),

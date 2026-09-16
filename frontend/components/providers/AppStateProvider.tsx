@@ -163,6 +163,8 @@ export const DEMO_USER: AppUser = { name: "Dr. A. Hernandez", role: "Internal Me
 type AppStateContextValue = {
   apiBaseUrl: string;
   user: AppUser;
+  /** True once persisted demo/patient/triage state has been read on the client. */
+  hydrated: boolean;
   demoMode: boolean;
   setDemoMode: (value: boolean) => void;
   patients: PatientListItem[];
@@ -200,31 +202,35 @@ function getDemoPatients(): PatientListItem[] {
 const initialDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [demoMode, setDemoModeState] = useState(readStoredDemoMode);
-  const [patients, setPatients] = useState<PatientListItem[]>(() =>
-    demoMode ? getDemoPatients() : [],
-  );
-  const [selectedPatientId, setSelectedPatientIdState] = useState<number | null>(
-    readStoredPatientId,
-  );
+  // Server and first client render use defaults; localStorage is read in the
+  // hydration effect below so the two renders never disagree.
+  const [hydrated, setHydrated] = useState(false);
+  const [demoMode, setDemoModeState] = useState(initialDemoMode);
+  const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [selectedPatientId, setSelectedPatientIdState] = useState<number | null>(1);
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsWarning, setPatientsWarning] = useState<string | null>(null);
   const [publicConfig, setPublicConfig] = useState<PublicConfigResponse | null>(null);
   const [activityVersion, setActivityVersion] = useState(0);
   const [lastActivityMessage, setLastActivityMessage] = useState<string | null>(null);
-  const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>(
-    readStoredTriageStates,
-  );
+  const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>({});
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    setDemoModeState(readStoredDemoMode());
+    setSelectedPatientIdState(readStoredPatientId());
+    setTriageStates(readStoredTriageStates());
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
       return;
     }
     window.localStorage.setItem(DEMO_MODE_KEY, String(demoMode));
-  }, [demoMode]);
+  }, [demoMode, hydrated]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!hydrated) {
       return;
     }
 
@@ -234,17 +240,21 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     window.localStorage.setItem(SELECTED_PATIENT_KEY, String(selectedPatientId));
-  }, [selectedPatientId]);
+  }, [selectedPatientId, hydrated]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!hydrated) {
       return;
     }
 
     window.localStorage.setItem(TRIAGE_STATE_KEY, JSON.stringify(triageStates));
-  }, [triageStates]);
+  }, [triageStates, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
     let cancelled = false;
 
     const loadPatients = async () => {
@@ -295,7 +305,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [demoMode]);
+  }, [demoMode, hydrated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -359,6 +369,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       value={{
         apiBaseUrl,
         user: DEMO_USER,
+        hydrated,
         demoMode,
         setDemoMode: setDemoModeState,
         patients,

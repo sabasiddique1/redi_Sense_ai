@@ -427,6 +427,8 @@ export type DashboardInsight = {
   title: string;
   summary: string;
   confidence: number;
+  /** Persisted records behind the insight; null for the demo snapshot. */
+  record_count: number | null;
 };
 
 export type DashboardRiskBucket = {

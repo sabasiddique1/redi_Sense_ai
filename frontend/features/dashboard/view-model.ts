@@ -79,6 +79,12 @@ export function mapDashboardSummary(
       title: summary.ai_insight.title,
       summary: summary.ai_insight.summary,
       confidence: summary.ai_insight.confidence,
+      basis:
+        summary.ai_insight.record_count != null
+          ? `Based on ${summary.ai_insight.record_count} record${
+              summary.ai_insight.record_count === 1 ? "" : "s"
+            }`
+          : undefined,
     },
     riskDistribution: summary.risk_distribution.map((bucket) => ({
       label: bucket.label,

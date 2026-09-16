@@ -76,14 +76,18 @@ function buildDemoPatientResponse(): PatientProfileResponse {
 }
 
 export function PatientProfilePage() {
-  const { demoMode, selectedPatientId, activityVersion } = useAppState();
+  const { demoMode, selectedPatientId, activityVersion, hydrated } = useAppState();
   const [activeTab, setActiveTab] = useState("overview");
-  const [patient, setPatient] = useState<PatientView | null>(demoMode ? mockPatientProfile : null);
-  const [loading, setLoading] = useState(false);
+  const [patient, setPatient] = useState<PatientView | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
     if (!selectedPatientId) {
+      setLoading(false);
       return;
     }
 
@@ -126,9 +130,9 @@ export function PatientProfilePage() {
     return () => {
       cancelled = true;
     };
-  }, [activityVersion, demoMode, selectedPatientId]);
+  }, [activityVersion, demoMode, selectedPatientId, hydrated]);
 
-  const displayedPatient = selectedPatientId ? patient : demoMode ? mockPatientProfile : null;
+  const displayedPatient = selectedPatientId ? patient : null;
 
   if (!displayedPatient) {
     return (

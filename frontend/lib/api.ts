@@ -9,8 +9,6 @@ import type {
   PatientListItem,
   PatientProfileResponse,
   PublicConfigResponse,
-  ReportAnalysisPayload,
-  ReportAnalysisResponse,
   ReportUploadResponse,
   TimelineEventResponse,
   TriageAnalyzePayload,
@@ -195,10 +193,6 @@ function extractResultMode<T>(data: T): ApiResult<T>["mode"] {
   return "real";
 }
 
-export function isAbortError(error: unknown): boolean {
-  return error instanceof DOMException && error.name === "AbortError";
-}
-
 export async function withDemoFallback<T>(
   operation: () => Promise<T>,
   options: FallbackOptions<T> = {},
@@ -324,21 +318,6 @@ export const apiClient = {
   fetchTimeline(patientId: number, options?: FallbackOptions<TimelineEventResponse[]>) {
     return withDemoFallback(
       () => requestJson<TimelineEventResponse[]>(`/api/patient/${patientId}/timeline`),
-      options,
-    );
-  },
-
-  analyzeReportText(
-    payload: ReportAnalysisPayload,
-    options?: FallbackOptions<ReportAnalysisResponse>,
-  ) {
-    return withDemoFallback(
-      () =>
-        requestJson<ReportAnalysisResponse>("/api/report/analyze", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }),
       options,
     );
   },

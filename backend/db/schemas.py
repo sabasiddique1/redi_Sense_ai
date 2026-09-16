@@ -517,6 +517,7 @@ class DashboardInsight(BaseModel):
   title: str
   summary: str
   confidence: int = Field(ge=0, le=100)
+  record_count: int | None = Field(default=None, ge=0)
 
 
 class DashboardRiskBucket(BaseModel):

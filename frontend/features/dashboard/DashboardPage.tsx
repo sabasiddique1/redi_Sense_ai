@@ -61,7 +61,7 @@ function DashboardSkeleton() {
 }
 
 export function DashboardPage() {
-  const { demoMode, activityVersion, user } = useAppState();
+  const { demoMode, activityVersion, user, hydrated } = useAppState();
   // Data is always populated in the effect so server and client render the
   // same initial markup regardless of the persisted demo toggle.
   const [data, setData] = useState<DashboardViewData | null>(null);
@@ -78,6 +78,10 @@ export function DashboardPage() {
   const retry = useCallback(() => setReloadKey((key) => key + 1), []);
 
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
     let cancelled = false;
 
     const load = async () => {
@@ -117,7 +121,7 @@ export function DashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [demoMode, activityVersion, reloadKey]);
+  }, [demoMode, activityVersion, reloadKey, hydrated]);
 
   const showSkeleton = loading && !data;
   const showError = !loading && !data && mode === "error";

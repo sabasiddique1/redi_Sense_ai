@@ -190,6 +190,7 @@ def build_dashboard_summary(db: Session) -> dict[str, Any]:
         f"Computed deterministically from {record_count} persisted records."
       ),
       "confidence": 100,
+      "record_count": record_count,
     }
   elif record_count:
     insight = {
@@ -200,6 +201,7 @@ def build_dashboard_summary(db: Session) -> dict[str, Any]:
         "Run a triage from the Symptom Triage page to populate the risk distribution."
       ),
       "confidence": 100,
+      "record_count": record_count,
     }
   else:
     insight = {
@@ -207,6 +209,7 @@ def build_dashboard_summary(db: Session) -> dict[str, Any]:
       "title": "No activity recorded yet",
       "summary": "Upload a report or run a triage to start populating the dashboard.",
       "confidence": 0,
+      "record_count": 0,
     }
 
   risk_distribution = [{"label": level, "value": risk_counts[level]} for level in RISK_LEVELS]
