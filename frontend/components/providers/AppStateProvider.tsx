@@ -150,8 +150,19 @@ function readStoredPatientId(): number | null {
     : 1;
 }
 
+export type AppUser = {
+  name: string;
+  role: string;
+};
+
+// There is no user/identity endpoint yet (Auth0 is optional and verifies tokens
+// only), so both modes present the demo clinician. Swap this for the verified
+// identity once a /me route exists.
+export const DEMO_USER: AppUser = { name: "Dr. A. Hernandez", role: "Internal Medicine" };
+
 type AppStateContextValue = {
   apiBaseUrl: string;
+  user: AppUser;
   demoMode: boolean;
   setDemoMode: (value: boolean) => void;
   patients: PatientListItem[];
@@ -347,6 +358,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     <AppStateContext.Provider
       value={{
         apiBaseUrl,
+        user: DEMO_USER,
         demoMode,
         setDemoMode: setDemoModeState,
         patients,

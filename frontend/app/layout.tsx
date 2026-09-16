@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} antialiased bg-[#F4F7FB] text-[#101828]`}
+        className={`${inter.variable} antialiased bg-app-background text-text-primary`}
       >
         <AppProviders>
           <AppShell>{children}</AppShell>

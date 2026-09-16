@@ -1,5 +1,38 @@
 @import "tailwindcss";
 
+/*
+ * RediSense identity layer (--rs-*).
+ * Plain custom properties so the accent and the clinical risk scale live in one
+ * place; the Tailwind theme below maps them onto utilities (bg-primary,
+ * text-risk-high-text, ...). Changing an --rs-* value re-themes the app.
+ */
+:root {
+  /* Accent: a clinical teal, one step away from generic UI blue */
+  --rs-accent: #1f7a8c;
+  --rs-accent-hover: #17677a;
+  --rs-accent-soft: #e6f4f7;
+  --rs-accent-strong: #135b6b;
+  --rs-accent-border: #b9dde5;
+
+  /* Risk scale: low -> critical. Each level has a fill, a soft tint, and a text ink */
+  --rs-risk-low: #16a34a;
+  --rs-risk-low-soft: #ecfdf3;
+  --rs-risk-low-text: #15803d;
+  --rs-risk-moderate: #d97706;
+  --rs-risk-moderate-soft: #fef3c7;
+  --rs-risk-moderate-text: #b45309;
+  --rs-risk-high: #ea580c;
+  --rs-risk-high-soft: #ffedd5;
+  --rs-risk-high-text: #c2410c;
+  --rs-risk-critical: #dc2626;
+  --rs-risk-critical-soft: #fef2f2;
+  --rs-risk-critical-text: #b91c1c;
+
+  /* App-shell texture */
+  --rs-grid-line: rgba(31, 122, 140, 0.05);
+  --rs-grid-size: 28px;
+}
+
 @theme inline {
   /* Fonts */
   --font-sans: var(--font-inter);
@@ -13,15 +46,55 @@
   --color-text-primary: #101828;
   --color-text-secondary: #667085;
 
-  --color-primary: #4c8dff;
-  --color-primary-soft: #eaf2ff;
-  --color-primary-hover: #3778f6;
+  --color-primary: var(--rs-accent);
+  --color-primary-soft: var(--rs-accent-soft);
+  --color-primary-hover: var(--rs-accent-hover);
 
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-danger: #ef4444;
 
   --color-pill-active: #111111;
+
+  /* Extended palette (values lifted verbatim from former inline hex) */
+  --color-text-tertiary: #98a2b3;
+  --color-text-body: #344054;
+  --color-surface-subtle: #f2f4f7;
+  --color-surface-hover: #f9fafb;
+  --color-primary-strong: var(--rs-accent-strong);
+  --color-primary-border: var(--rs-accent-border);
+
+  /* Risk scale utilities: bg-risk-high, bg-risk-high-soft, text-risk-high-text */
+  --color-risk-low: var(--rs-risk-low);
+  --color-risk-low-soft: var(--rs-risk-low-soft);
+  --color-risk-low-text: var(--rs-risk-low-text);
+  --color-risk-moderate: var(--rs-risk-moderate);
+  --color-risk-moderate-soft: var(--rs-risk-moderate-soft);
+  --color-risk-moderate-text: var(--rs-risk-moderate-text);
+  --color-risk-high: var(--rs-risk-high);
+  --color-risk-high-soft: var(--rs-risk-high-soft);
+  --color-risk-high-text: var(--rs-risk-high-text);
+  --color-risk-critical: var(--rs-risk-critical);
+  --color-risk-critical-soft: var(--rs-risk-critical-soft);
+  --color-risk-critical-text: var(--rs-risk-critical-text);
+  --color-accent-orange: #f97316;
+
+  --color-success-soft: #ecfdf3;
+  --color-success-tint: #dcfce7;
+  --color-success-text: #15803d;
+  --color-success-strong: #166534;
+
+  --color-warning-soft: #fef3c7;
+  --color-warning-tint: #fffaeb;
+  --color-warning-border: #fedf89;
+  --color-warning-text: #b45309;
+  --color-warning-strong: #92400e;
+
+  --color-danger-soft: #fef2f2;
+  --color-danger-border: #fee2e2;
+  --color-danger-text: #b91c1c;
+  --color-danger-text-alt: #b42318;
+  --color-danger-strong: #7f1d1d;
 
   /* Radii */
   --radius-shell: 28px;
@@ -58,6 +131,41 @@ body {
 .app-shell {
   min-height: 100vh;
   background-color: var(--color-app-background);
+  background-image:
+    radial-gradient(
+      ellipse 70% 55% at 50% -10%,
+      color-mix(in srgb, var(--rs-accent) 9%, transparent),
+      transparent 70%
+    ),
+    linear-gradient(var(--rs-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rs-grid-line) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    var(--rs-grid-size) var(--rs-grid-size),
+    var(--rs-grid-size) var(--rs-grid-size);
+  background-position: 0 0, -1px -1px, -1px -1px;
+}
+
+/* Skeleton shimmer used by loading states */
+@keyframes rs-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+.rs-skeleton {
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    var(--color-surface-subtle) 0%,
+    var(--color-surface-muted) 50%,
+    var(--color-surface-subtle) 100%
+  );
+  background-size: 200% 100%;
+  animation: rs-shimmer 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rs-skeleton { animation: none; }
 }
 
 /* Rounded app container: always full viewport height, content scrolls inside */
@@ -75,7 +183,7 @@ body {
 
 .pill-nav {
   border-radius: 999px;
-  background-color: #f2f4f7;
+  background-color: var(--color-surface-subtle);
 }
 
 .pill-nav-item {
@@ -88,5 +196,5 @@ body {
 
 .pill-nav-item-active {
   background-color: var(--color-pill-active);
-  color: #ffffff;
+  color: var(--color-surface);
 }

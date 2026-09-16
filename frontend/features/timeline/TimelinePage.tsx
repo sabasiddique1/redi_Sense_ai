@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "../shared/PageHeader";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState, ErrorState, SkeletonCard } from "../shared/PageStates";
 import { Badge } from "@/components/ui/badge";
-import { FileText, Pill, Stethoscope, Sparkles } from "lucide-react";
+import { Clock, FileText, Pill, Stethoscope, Sparkles } from "lucide-react";
 import { mockTimelineEvents } from "../mock-data/timeline";
 import { apiClient, ApiError } from "@/lib/api";
 import type { ResultMode, TimelineEventResponse } from "@/lib/contracts";
@@ -79,6 +81,7 @@ export function TimelinePage() {
     lastActivityMessage,
   } = useAppState();
   const [events, setEvents] = useState<TimelineEvent[]>([]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<ResultMode>("real");
 
@@ -90,6 +93,7 @@ export function TimelinePage() {
     let cancelled = false;
 
     const load = async () => {
+      setLoading(true);
       try {
         const result = await apiClient.fetchTimeline(selectedPatientId, {
           demoMode,
@@ -113,6 +117,10 @@ export function TimelinePage() {
         setEvents([]);
         setMode("error");
         setError(message);
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -142,18 +150,27 @@ export function TimelinePage() {
             {modeLabel(mode)}
           </Badge>
           {lastActivityMessage ? (
-            <span className="text-[11px] text-[#1D4ED8]">{lastActivityMessage}</span>
+            <span className="text-[11px] text-primary-strong">{lastActivityMessage}</span>
           ) : null}
         </div>
 
-        {visibleEvents.length > 0 ? (
+        {loading && visibleEvents.length === 0 ? (
+          <div className="space-y-4" aria-busy="true">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="flex gap-4">
+                <Skeleton className="h-8 w-8 shrink-0 rounded-full" />
+                <SkeletonCard lines={2} className="flex-1" />
+              </div>
+            ))}
+          </div>
+        ) : visibleEvents.length > 0 ? (
           <div className="relative">
-            <div className="absolute bottom-0 left-4 top-0 w-px bg-[#E6ECF5]" />
+            <div className="absolute bottom-0 left-4 top-0 w-px bg-border-subtle" />
 
             <div className="space-y-4">
               {visibleEvents.map((event) => (
                 <div key={event.id} className="relative flex gap-4">
-                  <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-[#4C8DFF] text-white shadow-[0_2px_8px_rgba(76,141,255,0.3)]">
+                  <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-[0_2px_8px_rgba(76,141,255,0.3)]">
                     {EVENT_ICONS[event.type] ? (
                       (() => {
                         const Icon = EVENT_ICONS[event.type];
@@ -164,27 +181,27 @@ export function TimelinePage() {
                     )}
                   </div>
                   <div className="flex-1 pb-4">
-                    <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+                    <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between gap-2">
-                          <span className="text-[11px] text-[#98A2B3]">
+                          <span className="text-[11px] text-text-tertiary">
                             {event.date} · {event.time}
                           </span>
                           <Badge tone="outline" className="text-[10px]">
                             {event.type}
                           </Badge>
                         </div>
-                        <h3 className="mt-1 text-sm font-semibold text-[#101828]">
+                        <h3 className="mt-1 text-sm font-semibold text-text-primary">
                           {event.title}
                         </h3>
-                        <p className="mt-0.5 text-xs text-[#667085]">
+                        <p className="mt-0.5 text-xs text-text-secondary">
                           {event.detail}
                         </p>
                         {event.findings && event.findings.length > 0 ? (
-                          <ul className="mt-2 space-y-0.5 text-[11px] text-[#667085]">
+                          <ul className="mt-2 space-y-0.5 text-[11px] text-text-secondary">
                             {event.findings.map((finding) => (
                               <li key={finding} className="flex items-start gap-2">
-                                <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-[#4C8DFF]" />
+                                <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full bg-primary" />
                                 {finding}
                               </li>
                             ))}
@@ -197,17 +214,20 @@ export function TimelinePage() {
               ))}
             </div>
           </div>
+        ) : mode === "error" ? (
+          <ErrorState
+            title="The connected timeline is unavailable"
+            description="Restore the backend service or enable demo mode explicitly from Settings."
+          />
         ) : (
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-12 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-            <p className="text-sm text-[#98A2B3]">
-              {mode === "error"
-                ? "The connected timeline is unavailable. Restore the backend service or enable demo mode explicitly."
-                : "No timeline events are available for the selected patient yet."}
-            </p>
-          </Card>
+          <EmptyState
+            icon={Clock}
+            title="No timeline events yet"
+            description="Report analyses and triage runs for the selected patient will appear here in chronological order."
+          />
         )}
         {error ? (
-          <p className="text-[11px] text-[#B42318]">{error}</p>
+          <p className="text-[11px] text-danger-text-alt">{error}</p>
         ) : null}
       </div>
     </div>

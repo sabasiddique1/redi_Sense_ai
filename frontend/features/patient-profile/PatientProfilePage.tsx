@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { PageHeader } from "../shared/PageHeader";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState, ErrorState, SkeletonCard } from "../shared/PageStates";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { User, Phone, Calendar, AlertTriangle, CheckCircle } from "lucide-react";
@@ -78,6 +79,7 @@ export function PatientProfilePage() {
   const { demoMode, selectedPatientId, activityVersion } = useAppState();
   const [activeTab, setActiveTab] = useState("overview");
   const [patient, setPatient] = useState<PatientView | null>(demoMode ? mockPatientProfile : null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,6 +90,7 @@ export function PatientProfilePage() {
     let cancelled = false;
 
     const loadPatient = async () => {
+      setLoading(true);
       try {
         const result = await apiClient.fetchPatient(selectedPatientId, {
           demoMode,
@@ -111,6 +114,10 @@ export function PatientProfilePage() {
         if (!demoMode) {
           setPatient(null);
         }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
@@ -130,14 +137,29 @@ export function PatientProfilePage() {
           title="Patient Profile"
           subtitle="Clinical overview, reports, medications, and AI-assisted notes."
         />
-        <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-12 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-          <p className="text-sm text-[#98A2B3]">
-            {error
-              ? "The connected patient profile is unavailable. Restore the backend service or enable demo mode explicitly."
-              : "Select a patient to load the connected profile."}
-          </p>
-          {error ? <p className="mt-3 text-[11px] text-[#B42318]">{error}</p> : null}
-        </Card>
+        {loading ? (
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]" aria-busy="true">
+            <div className="space-y-4">
+              <SkeletonCard lines={3} />
+              <SkeletonCard lines={5} />
+            </div>
+            <div className="space-y-4">
+              <SkeletonCard lines={2} />
+              <SkeletonCard lines={3} />
+            </div>
+          </div>
+        ) : error ? (
+          <ErrorState
+            title="The connected patient profile is unavailable"
+            description={error}
+          />
+        ) : (
+          <EmptyState
+            icon={User}
+            title="No patient selected"
+            description="Choose a patient from the top navigation to load the connected profile."
+          />
+        )}
       </div>
     );
   }
@@ -152,16 +174,16 @@ export function PatientProfilePage() {
       <div className="grid gap-5 lg:grid-cols-12">
         {/* Main content */}
         <div className="space-y-4 lg:col-span-8">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EAF2FF] text-2xl font-semibold text-[#4C8DFF]">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-2xl font-semibold text-primary">
                   <User className="h-8 w-8" />
               </div>
               <div className="flex-1">
-                <h2 className="text-lg font-semibold text-[#101828]">
+                <h2 className="text-lg font-semibold text-text-primary">
                   {displayedPatient.name}
                 </h2>
-                <p className="text-xs text-[#667085]">
+                <p className="text-xs text-text-secondary">
                   MRN {displayedPatient.mrn} · DOB {displayedPatient.dob} · {displayedPatient.gender}
                 </p>
                 <div className="mt-2 flex gap-2">
@@ -179,7 +201,7 @@ export function PatientProfilePage() {
           </Card>
 
           <div className="space-y-3">
-            <div className="inline-flex items-center gap-1 rounded-full bg-[#F2F4F7] p-1">
+            <div className="inline-flex items-center gap-1 rounded-full bg-surface-subtle p-1">
               {(["overview", "reports", "medications", "history", "ai-notes"] as const).map((tab) => (
                 <button
                   key={tab}
@@ -187,8 +209,8 @@ export function PatientProfilePage() {
                   onClick={() => setActiveTab(tab)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                     activeTab === tab
-                      ? "bg-[#111111] text-white"
-                      : "text-[#667085] hover:text-[#101828]"
+                      ? "bg-pill-active text-white"
+                      : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   {tab === "ai-notes" ? "AI notes" : tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -197,26 +219,26 @@ export function PatientProfilePage() {
             </div>
 
             {activeTab === "overview" && (
-            <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+            <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
                 <div className="grid gap-4 sm:grid-cols-2">
                   {Object.entries(displayedPatient.overview).map(([k, v]) => (
-                    <div key={k} className="rounded-[14px] bg-[#F8FAFD] px-3 py-2">
-                      <p className="text-[11px] text-[#667085]">{k}</p>
-                      <p className="text-xs font-medium text-[#101828]">{v}</p>
+                    <div key={k} className="rounded-[14px] bg-surface-muted px-3 py-2">
+                      <p className="text-[11px] text-text-secondary">{k}</p>
+                      <p className="text-xs font-medium text-text-primary">{v}</p>
                     </div>
                   ))}
                 </div>
               </Card>
             )}
             {activeTab === "reports" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
                 <ul className="space-y-2">
                   {displayedPatient.reports.map((r) => (
                     <li
                       key={r.id}
-                      className="flex items-center justify-between rounded-[14px] bg-[#F8FAFD] px-3 py-2"
+                      className="flex items-center justify-between rounded-[14px] bg-surface-muted px-3 py-2"
                     >
-                      <span className="text-xs font-medium text-[#101828]">
+                      <span className="text-xs font-medium text-text-primary">
                         {r.modality} — {r.date}
                       </span>
                       <Badge tone="outline">{r.status}</Badge>
@@ -226,12 +248,12 @@ export function PatientProfilePage() {
               </Card>
             )}
             {activeTab === "medications" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
                 <ul className="space-y-2">
                   {displayedPatient.medications.map((m) => (
                     <li
                       key={m}
-                      className="rounded-[14px] bg-[#F8FAFD] px-3 py-2 text-xs text-[#101828]"
+                      className="rounded-[14px] bg-surface-muted px-3 py-2 text-xs text-text-primary"
                     >
                       {m}
                     </li>
@@ -240,13 +262,13 @@ export function PatientProfilePage() {
               </Card>
             )}
             {activeTab === "history" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <p className="text-xs text-[#667085]">{displayedPatient.history}</p>
+              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+                <p className="text-xs text-text-secondary">{displayedPatient.history}</p>
               </Card>
             )}
             {activeTab === "ai-notes" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <p className="text-xs text-[#667085]">{displayedPatient.aiNotes}</p>
+              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+                <p className="text-xs text-text-secondary">{displayedPatient.aiNotes}</p>
               </Card>
             )}
           </div>
@@ -254,11 +276,11 @@ export function PatientProfilePage() {
 
         {/* Sidebar: Alerts + Tasks */}
         <div className="space-y-4 lg:col-span-4">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-[#EF4444]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
+                <AlertTriangle className="h-4 w-4 text-danger" />
+                <CardTitle className="text-sm font-semibold text-text-primary">
                   Alerts
                 </CardTitle>
               </div>
@@ -267,23 +289,23 @@ export function PatientProfilePage() {
               {displayedPatient.alerts.map((a) => (
                 <div
                   key={a.id}
-                  className="flex items-start gap-2 rounded-[14px] bg-[#FEF2F2] px-3 py-2"
+                  className="flex items-start gap-2 rounded-[14px] bg-danger-soft px-3 py-2"
                 >
                   <span className="text-red-500">●</span>
                   <div>
-                    <p className="text-xs font-medium text-[#B91C1C]">{a.label}</p>
-                    <p className="text-[11px] text-[#7F1D1D]">{a.detail}</p>
+                    <p className="text-xs font-medium text-danger-text">{a.label}</p>
+                    <p className="text-[11px] text-danger-strong">{a.detail}</p>
                   </div>
                 </div>
               ))}
             </CardContent>
           </Card>
 
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-[#4C8DFF]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
+                <CheckCircle className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm font-semibold text-text-primary">
                   Tasks
                 </CardTitle>
               </div>
@@ -292,9 +314,9 @@ export function PatientProfilePage() {
               {displayedPatient.tasks.map((t) => (
                 <div
                   key={t.id}
-                  className="flex items-center justify-between rounded-[14px] bg-[#F8FAFD] px-3 py-2"
+                  className="flex items-center justify-between rounded-[14px] bg-surface-muted px-3 py-2"
                 >
-                  <p className="text-xs text-[#101828]">{t.label}</p>
+                  <p className="text-xs text-text-primary">{t.label}</p>
                   <Badge tone={t.status === "Done" ? "success" : "default"}>
                     {t.status}
                   </Badge>
@@ -304,7 +326,7 @@ export function PatientProfilePage() {
           </Card>
         </div>
       </div>
-      {error ? <p className="text-[11px] text-[#B45309]">{error}</p> : null}
+      {error ? <p className="text-[11px] text-warning-text">{error}</p> : null}
     </div>
   );
 }

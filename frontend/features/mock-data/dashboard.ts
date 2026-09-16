@@ -8,6 +8,7 @@ import type {
   DashboardRiskLevel,
   DashboardSummaryResponse,
 } from "../../lib/contracts";
+import { riskClasses } from "../shared/risk.ts";
 
 interface DashboardMockData {
   metrics: Metric[];
@@ -120,10 +121,10 @@ export const mockDashboardData: DashboardMockData = {
     confidence: 89,
   },
   riskDistribution: [
-    { label: "Low", value: 48, color: "bg-[#22C55E]" },
-    { label: "Moderate", value: 23, color: "bg-[#F59E0B]" },
-    { label: "High", value: 9, color: "bg-[#F97316]" },
-    { label: "Critical", value: 4, color: "bg-[#EF4444]" },
+    { label: "Low", value: 48, color: riskClasses("Low").bar },
+    { label: "Moderate", value: 23, color: riskClasses("Moderate").bar },
+    { label: "High", value: 9, color: riskClasses("High").bar },
+    { label: "Critical", value: 4, color: riskClasses("Critical").bar },
   ],
   recentActivity: [
     {

@@ -30,6 +30,9 @@ import type {
 } from "@/lib/contracts";
 import { mockTriageResult } from "../mock-data/symptom-triage";
 import { PageHeader } from "../shared/PageHeader";
+import { SkeletonCard } from "../shared/PageStates";
+import { EvidenceChips, VerdictBlock } from "../shared/VerdictBlock";
+import { isEscalationLevel, normalizeRiskLevel, riskClasses } from "../shared/risk";
 
 
 type TriageResult = {
@@ -368,13 +371,6 @@ function modeTone(mode: ResultMode): "success" | "warning" | "outline" | "danger
   return "danger";
 }
 
-function careTone(careLevel: TriageCareLevel | null): "success" | "warning" | "outline" | "danger" {
-  if (careLevel === "Emergency") return "danger";
-  if (careLevel === "Urgent") return "warning";
-  if (careLevel === "Routine") return "outline";
-  return "success";
-}
-
 function SectionLabel({
   title,
   description,
@@ -384,9 +380,9 @@ function SectionLabel({
 }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-[11px] font-medium text-[#344054]">{title}</p>
+      <p className="text-[11px] font-medium text-text-body">{title}</p>
       {description ? (
-        <p className="text-[11px] text-[#667085]">{description}</p>
+        <p className="text-[11px] text-text-secondary">{description}</p>
       ) : null}
     </div>
   );
@@ -575,18 +571,18 @@ export function SymptomTriagePage() {
 
       <div className="grid gap-5 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
-                <Stethoscope className="h-4 w-4 text-[#4C8DFF]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
+                <Stethoscope className="h-4 w-4 text-primary" />
+                <CardTitle className="text-sm font-semibold text-text-primary">
                   Symptom input
                 </CardTitle>
               </div>
-              <p className="text-[11px] text-[#667085]">
+              <p className="text-[11px] text-text-secondary">
                 Structured facts drive triage. AI is used only to explain the grounded result.
               </p>
-              <p className="text-[11px] text-[#667085]">
+              <p className="text-[11px] text-text-secondary">
                 {selectedPatient
                   ? `Linked patient: ${selectedPatient.name}`
                   : "Running without connected patient context"}
@@ -782,13 +778,13 @@ export function SymptomTriagePage() {
                       value={triageDraft.additionalDetails}
                       onChange={(event) => updateDraft({ additionalDetails: event.target.value })}
                       placeholder="Optional free text. Use this only for extra details that are not covered above."
-                      className="rounded-[14px] border-[#E6ECF5]"
+                      className="rounded-[14px] border-border-subtle"
                     />
                   </div>
                 </TabsContent>
 
                 <TabsContent value="vitals" activeValue={activeTab} className="space-y-4">
-                  <p className="text-[11px] text-[#667085]">
+                  <p className="text-[11px] text-text-secondary">
                     Optional vital signs. Abnormal vitals can increase urgency even when no explicit red flags are checked.
                   </p>
                   <div className="grid gap-3 sm:grid-cols-2">
@@ -842,8 +838,8 @@ export function SymptomTriagePage() {
                 </TabsContent>
               </Tabs>
 
-              <div className="rounded-[14px] bg-[#F8FAFD] p-3">
-                <p className="text-[11px] text-[#667085]">
+              <div className="rounded-[14px] bg-surface-muted p-3">
+                <p className="text-[11px] text-text-secondary">
                   The urgency level is determined by rule-based logic first. AI is allowed to explain the result, but it cannot invent red flags or override the final urgency.
                 </p>
               </div>
@@ -857,20 +853,56 @@ export function SymptomTriagePage() {
                 {loading ? "Analyzing…" : "Analyze triage"}
               </Button>
               {triageTimelineMessage ? (
-                <p className="text-[11px] text-[#1D4ED8]">{triageTimelineMessage}</p>
+                <p className="text-[11px] text-primary-strong">{triageTimelineMessage}</p>
               ) : null}
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-4 lg:col-span-7">
-          {result ? (
+          {loading && !result ? (
+            <div className="space-y-4" aria-busy="true">
+              <SkeletonCard lines={2} />
+              <SkeletonCard lines={4} />
+              <SkeletonCard lines={3} />
+            </div>
+          ) : result ? (
             <>
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+              <VerdictBlock
+                severityLabel="Risk level"
+                severity={normalizeRiskLevel(result.riskLevel)}
+                secondary={result.careLevel ? `Care level: ${result.careLevel}` : null}
+                confidence={null}
+                confidenceNote="Urgency is rule-based and is not scored as a probability."
+                escalate={
+                  !result.invalidInput &&
+                  (isEscalationLevel(normalizeRiskLevel(result.riskLevel)) || result.redFlags.length > 0)
+                }
+                escalationText={
+                  result.invalidInput
+                    ? "Input needs correction before a verdict can be issued."
+                    : result.redFlags.length > 0
+                      ? `${result.redFlags.length} explicit red flag${result.redFlags.length === 1 ? "" : "s"} detected`
+                      : "No explicit red flags were reported."
+                }
+                basis={
+                  result.aiMode
+                    ? `Rule-based urgency · AI explanation (${result.aiMode})`
+                    : "Rule-based urgency"
+                }
+                mode={result.renderMode}
+              />
+              {!result.invalidInput && result.differential.length > 0 ? (
+                <EvidenceChips
+                  title="Evidence lookups for the differential"
+                  items={result.differential.map((item) => ({ id: item, label: item, query: item }))}
+                />
+              ) : null}
+              <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
                 <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
                   <div className="flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-[#4C8DFF]" />
-                    <CardTitle className="text-sm font-semibold text-[#101828]">
+                    <Stethoscope className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold text-text-primary">
                       Triage result
                     </CardTitle>
                   </div>
@@ -879,28 +911,32 @@ export function SymptomTriagePage() {
                       {modeLabel(result.renderMode)}
                     </Badge>
                     {result.careLevel ? (
-                      <Badge tone={careTone(result.careLevel)}>
+                      <Badge
+                        tone="none"
+                        className={`gap-1.5 ${riskClasses(normalizeRiskLevel(result.riskLevel)).badge}`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${riskClasses(normalizeRiskLevel(result.riskLevel)).dot}`} />
                         {result.careLevel}
                       </Badge>
                     ) : null}
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 pt-0">
-                  <p className="text-xs leading-relaxed text-[#101828]">
+                  <p className="text-xs leading-relaxed text-text-primary">
                     {result.summary}
                   </p>
                   {result.aiMode ? (
-                    <p className="text-[11px] text-[#667085]">
+                    <p className="text-[11px] text-text-secondary">
                       AI processing: {result.aiMode}
                     </p>
                   ) : null}
                   {result.fallbackReason ? (
-                    <p className="text-[11px] text-[#667085]">
+                    <p className="text-[11px] text-text-secondary">
                       Fallback reason: {result.fallbackReason}
                     </p>
                   ) : null}
                   {result.invalidInput ? (
-                    <div className="rounded-[14px] border border-[#FEDF89] bg-[#FFFAEB] px-3 py-3 text-xs text-[#92400E]">
+                    <div className="rounded-[14px] border border-warning-border bg-warning-tint px-3 py-3 text-xs text-warning-strong">
                       {result.validationMessage}
                     </div>
                   ) : null}
@@ -909,7 +945,7 @@ export function SymptomTriagePage() {
                       {result.differential.map((item) => (
                         <span
                           key={item}
-                          className="rounded-full bg-[#EAF2FF] px-2.5 py-0.5 text-[11px] font-medium text-[#1D4ED8]"
+                          className="rounded-full bg-primary-soft px-2.5 py-0.5 text-[11px] font-medium text-primary-strong"
                         >
                           {item}
                         </span>
@@ -920,11 +956,11 @@ export function SymptomTriagePage() {
               </Card>
 
               {!result.invalidInput && result.reasoning.length > 0 ? (
-                <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+                <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-[#4C8DFF]" />
-                      <CardTitle className="text-sm font-semibold text-[#101828]">
+                      <ArrowRight className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-semibold text-text-primary">
                         Why this result
                       </CardTitle>
                     </div>
@@ -933,7 +969,7 @@ export function SymptomTriagePage() {
                     {result.reasoning.map((item) => (
                       <div
                         key={item}
-                        className="rounded-[14px] bg-[#F8FAFD] px-3 py-2 text-xs text-[#344054]"
+                        className="rounded-[14px] bg-surface-muted px-3 py-2 text-xs text-text-body"
                       >
                         {item}
                       </div>
@@ -943,11 +979,11 @@ export function SymptomTriagePage() {
               ) : null}
 
               {!result.invalidInput && result.redFlags.length > 0 ? (
-                <Card className="rounded-[20px] border border-[#FEE2E2] bg-[#FEF2F2] shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+                <Card className="rounded-[20px] border border-risk-critical/30 bg-risk-critical-soft shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-[#B91C1C]" />
-                      <CardTitle className="text-sm font-semibold text-[#B91C1C]">
+                      <AlertTriangle className="h-4 w-4 text-risk-critical-text" />
+                      <CardTitle className="text-sm font-semibold text-risk-critical-text">
                         Explicit red flags detected
                       </CardTitle>
                     </div>
@@ -958,8 +994,8 @@ export function SymptomTriagePage() {
                         key={flag}
                         className="flex items-center gap-2 rounded-[14px] bg-white/80 px-3 py-2"
                       >
-                        <span className="text-red-500">⚠</span>
-                        <p className="text-xs text-[#7F1D1D]">{flag}</p>
+                        <span className="text-risk-critical">⚠</span>
+                        <p className="text-xs text-risk-critical-text">{flag}</p>
                       </div>
                     ))}
                   </CardContent>
@@ -967,38 +1003,38 @@ export function SymptomTriagePage() {
               ) : null}
 
               {!result.invalidInput ? (
-                <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+                <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-[#4C8DFF]" />
-                      <CardTitle className="text-sm font-semibold text-[#101828]">
+                      <ArrowRight className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-semibold text-text-primary">
                         Recommended action
                       </CardTitle>
                     </div>
                   </CardHeader>
                   <CardContent className="pt-0">
-                    <div className="rounded-[14px] bg-[#EAF2FF] p-4">
-                      <p className="text-sm font-semibold text-[#1D4ED8]">
+                    <div className="rounded-[14px] bg-primary-soft p-4">
+                      <p className="text-sm font-semibold text-primary-strong">
                         {result.recommendedAction}
                       </p>
-                      <p className="mt-1 text-xs text-[#667085]">
+                      <p className="mt-1 text-xs text-text-secondary">
                         {result.actionDetail}
                       </p>
                     </div>
                   </CardContent>
                 </Card>
               ) : null}
-              <p className="text-[11px] text-[#667085]">{result.disclaimer}</p>
+              <p className="text-[11px] text-text-secondary">{result.disclaimer}</p>
             </>
           ) : (
-            <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-12 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-              <p className="text-sm text-[#98A2B3]">
+            <Card className="rounded-[20px] border border-border-subtle bg-white p-12 text-center shadow-soft">
+              <p className="text-sm text-text-tertiary">
                 Enter structured symptom details and click &quot;Analyze triage&quot; to see results.
               </p>
             </Card>
           )}
           {error ? (
-            <p className="text-[11px] text-[#B42318]">{error}</p>
+            <p className="text-[11px] text-danger-text-alt">{error}</p>
           ) : null}
         </div>
       </div>

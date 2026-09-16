@@ -11,21 +11,21 @@ export interface Insight {
 
 export function InsightCard({ insight }: { insight: Insight }) {
   return (
-    <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
+    <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
-            <Lightbulb className="h-4 w-4 shrink-0 text-[#F59E0B]" />
+            <Lightbulb className="h-4 w-4 shrink-0 text-warning" />
             <CardTitle>AI signal of the day</CardTitle>
           </div>
-          <Badge className="bg-[#EAF2FF] text-[10px] text-[#1D4ED8]">
+          <Badge className="bg-primary-soft text-[10px] text-primary-strong">
             {insight.confidence}% confidence
           </Badge>
         </div>
       </CardHeader>
       <CardContent className="space-y-1 pt-0">
-        <p className="text-xs font-semibold text-[#101828]">{insight.title}</p>
-        <p className="text-[11px] leading-relaxed text-[#667085]">
+        <p className="text-xs font-semibold text-text-primary">{insight.title}</p>
+        <p className="text-[11px] leading-relaxed text-text-secondary">
           {insight.summary}
         </p>
       </CardContent>

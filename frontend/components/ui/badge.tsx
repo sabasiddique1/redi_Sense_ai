@@ -1,7 +1,9 @@
 import * as React from "react";
 import { cn } from "./cn";
 
-export type BadgeTone = "default" | "success" | "warning" | "danger" | "outline";
+// "none" applies no tone colours so className fully controls bg/text
+// (class order alone cannot reliably override a tone).
+export type BadgeTone = "default" | "success" | "warning" | "danger" | "outline" | "none";
 
 export interface BadgeProps
   extends React.HTMLAttributes<HTMLSpanElement> {
@@ -9,12 +11,13 @@ export interface BadgeProps
 }
 
 const toneClasses: Record<BadgeTone, string> = {
-  default: "bg-[#EAF2FF] text-[#1D4ED8]",
-  success: "bg-[#ECFDF3] text-[#166534]",
-  warning: "bg-[#FEF3C7] text-[#92400E]",
-  danger: "bg-[#FEF2F2] text-[#B91C1C]",
+  default: "bg-primary-soft text-primary-strong",
+  success: "bg-success-soft text-success-strong",
+  warning: "bg-warning-soft text-warning-strong",
+  danger: "bg-danger-soft text-danger-text",
   outline:
-    "border border-dashed border-[#E6ECF5] text-[#667085] bg-transparent",
+    "border border-dashed border-border-subtle text-text-secondary bg-transparent",
+  none: "",
 };
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(

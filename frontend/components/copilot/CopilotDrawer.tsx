@@ -374,23 +374,23 @@ export function CopilotDrawer({
       }`}
     >
       <div
-        className={`absolute inset-0 bg-[#101828]/20 transition-opacity ${
+        className={`absolute inset-0 bg-text-primary/20 transition-opacity ${
           open ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
       />
       <aside
-        className={`absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col border-l border-[#E6ECF5] bg-white shadow-[-18px_0_45px_rgba(15,23,42,0.08)] transition-transform ${
+        className={`absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col border-l border-border-subtle bg-white shadow-[-18px_0_45px_rgba(15,23,42,0.08)] transition-transform ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
-        <div className="flex items-center justify-between border-b border-[#E6ECF5] px-5 py-4">
+        <div className="flex items-center justify-between border-b border-border-subtle px-5 py-4">
           <div>
             <div className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-[#4C8DFF]" />
-              <h3 className="text-sm font-semibold text-[#101828]">RediSense Copilot</h3>
+              <Bot className="h-5 w-5 text-primary" />
+              <h3 className="text-sm font-semibold text-text-primary">RediSense Copilot</h3>
             </div>
-            <p className="mt-1 text-[11px] text-[#667085]">
+            <p className="mt-1 text-[11px] text-text-secondary">
               {selectedPatient
                 ? `Context: ${selectedPatient.name} · MRN ${selectedPatient.mrn ?? "N/A"}`
                 : "No connected patient selected"}
@@ -406,10 +406,10 @@ export function CopilotDrawer({
           </div>
         </div>
 
-        <div className="border-b border-[#E6ECF5] px-5 py-3">
+        <div className="border-b border-border-subtle px-5 py-3">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {visibleTabs.length === 0 ? (
-              <p className="py-1 text-[11px] text-[#98A2B3]">
+              <p className="py-1 text-[11px] text-text-tertiary">
                 Previous Copilot conversations will appear here.
               </p>
             ) : (
@@ -420,8 +420,8 @@ export function CopilotDrawer({
                     key={tab.id}
                     className={`flex max-w-[240px] shrink-0 items-center gap-1 rounded-full border px-2 py-1 ${
                       active
-                        ? "border-[#C7D7FE] bg-[#EAF2FF] text-[#1D4ED8]"
-                        : "border-[#E6ECF5] bg-white text-[#667085]"
+                        ? "border-primary-border bg-primary-soft text-primary-strong"
+                        : "border-border-subtle bg-white text-text-secondary"
                     }`}
                   >
                     <button
@@ -433,7 +433,7 @@ export function CopilotDrawer({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full p-1 transition-colors hover:bg-white/80 hover:text-[#101828]"
+                      className="rounded-full p-1 transition-colors hover:bg-white/80 hover:text-text-primary"
                       onClick={(event) => {
                         event.stopPropagation();
                         handleCloseConversation(tab.id);
@@ -451,13 +451,13 @@ export function CopilotDrawer({
 
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
           {loadingConversationId === activeConversationId && messages.length === 0 ? (
-            <div className="rounded-[20px] border border-dashed border-[#E6ECF5] bg-[#F8FAFD] p-4 text-sm text-[#667085]">
+            <div className="rounded-[20px] border border-dashed border-border-subtle bg-surface-muted p-4 text-sm text-text-secondary">
               Loading conversation…
             </div>
           ) : null}
 
           {messages.length === 0 && loadingConversationId !== activeConversationId ? (
-            <div className="rounded-[20px] border border-dashed border-[#E6ECF5] bg-[#F8FAFD] p-4 text-sm text-[#667085]">
+            <div className="rounded-[20px] border border-dashed border-border-subtle bg-surface-muted p-4 text-sm text-text-secondary">
               Ask about a report, triage concern, or evidence question. Responses are
               clinical decision support only and should be verified before use.
             </div>
@@ -468,8 +468,8 @@ export function CopilotDrawer({
               key={message.id}
               className={`rounded-[20px] px-4 py-3 ${
                 message.role === "assistant"
-                  ? "bg-[#F8FAFD] text-[#101828]"
-                  : "ml-10 bg-[#EAF2FF] text-[#1D4ED8]"
+                  ? "bg-surface-muted text-text-primary"
+                  : "ml-10 bg-primary-soft text-primary-strong"
               }`}
             >
               <div className="mb-2 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.08em]">
@@ -497,7 +497,7 @@ export function CopilotDrawer({
               </div>
               <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
               {message.role === "assistant" && message.contextUsed != null ? (
-                <p className="mt-2 text-[11px] text-[#667085]">
+                <p className="mt-2 text-[11px] text-text-secondary">
                   {message.contextUsed
                     ? "Used connected patient context"
                     : "No connected patient context used"}
@@ -509,14 +509,14 @@ export function CopilotDrawer({
                   {message.citations.map((citation) => (
                     <div
                       key={`${message.id}-${citation.title}`}
-                      className="rounded-[14px] border border-[#E6ECF5] bg-white px-3 py-2 text-xs text-[#667085]"
+                      className="rounded-[14px] border border-border-subtle bg-white px-3 py-2 text-xs text-text-secondary"
                     >
-                      <p className="font-medium text-[#101828]">{citation.title}</p>
+                      <p className="font-medium text-text-primary">{citation.title}</p>
                       <p>
                         {[citation.source, citation.section].filter(Boolean).join(" · ")}
                       </p>
                       {citation.snippet ? (
-                        <p className="mt-1 text-[#667085]">{citation.snippet}</p>
+                        <p className="mt-1 text-text-secondary">{citation.snippet}</p>
                       ) : null}
                     </div>
                   ))}
@@ -526,14 +526,14 @@ export function CopilotDrawer({
           ))}
 
           {loading ? (
-            <div className="rounded-[20px] bg-[#F8FAFD] px-4 py-3 text-sm text-[#667085]">
+            <div className="rounded-[20px] bg-surface-muted px-4 py-3 text-sm text-text-secondary">
               Copilot is thinking…
             </div>
           ) : null}
         </div>
 
-        <div className="border-t border-[#E6ECF5] px-5 py-4">
-          {error ? <p className="mb-3 text-[11px] text-[#B42318]">{error}</p> : null}
+        <div className="border-t border-border-subtle px-5 py-4">
+          {error ? <p className="mb-3 text-[11px] text-danger-text-alt">{error}</p> : null}
           <Textarea
             value={input}
             onChange={(event) => setInput(event.target.value)}
@@ -545,10 +545,10 @@ export function CopilotDrawer({
             }}
             rows={4}
             placeholder="Ask Copilot about the active patient, report, or evidence question..."
-            className="rounded-[18px] border-[#E6ECF5]"
+            className="rounded-[18px] border-border-subtle"
           />
           <div className="mt-3 flex items-center justify-between gap-3">
-            <p className="text-[11px] text-[#98A2B3]">
+            <p className="text-[11px] text-text-tertiary">
               Clinical decision support only. Verify before acting.
             </p>
             <Button

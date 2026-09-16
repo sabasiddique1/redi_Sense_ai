@@ -10,6 +10,7 @@ import { useAppState } from "@/hooks/useAppState";
 export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
   const router = useRouter();
   const {
+    user,
     demoMode,
     patients,
     patientsLoading,
@@ -19,13 +20,13 @@ export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
   } = useAppState();
 
   return (
-    <header className="relative flex h-[72px] items-center justify-between gap-4 border-b border-[#E6ECF5] bg-white px-4 sm:px-6">
+    <header className="relative flex h-[72px] items-center justify-between gap-4 border-b border-border-subtle bg-white px-4 sm:px-6">
       <div className="flex items-center gap-3">
-        <h2 className="text-base font-semibold text-[#101828]">
-          Welcome back, Dr. Hernandez
+        <h2 className="text-base font-semibold text-text-primary">
+          Welcome back, {user.name}
         </h2>
         <span className="hidden sm:inline">
-          <Bot className="h-5 w-5 text-[#4C8DFF]" />
+          <Bot className="h-5 w-5 text-primary" />
         </span>
       </div>
       <div className="flex flex-1 items-center justify-end gap-3">
@@ -33,7 +34,7 @@ export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
           <select
             value={selectedPatientId ?? ""}
             onChange={(event) => setSelectedPatientId(Number(event.target.value))}
-            className="h-9 w-full rounded-[14px] border border-[#E6ECF5] bg-[#F8FAFD] px-3 text-sm text-[#101828]"
+            className="h-9 w-full rounded-[14px] border border-border-subtle bg-surface-muted px-3 text-sm text-text-primary"
             disabled={patientsLoading || patients.length === 0}
           >
             {patients.length === 0 ? (
@@ -46,7 +47,7 @@ export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
             ))}
           </select>
         </div>
-        <div className="hidden rounded-full bg-[#F2F4F7] px-3 py-1.5 text-[11px] font-medium text-[#667085] sm:block">
+        <div className="hidden rounded-full bg-surface-subtle px-3 py-1.5 text-[11px] font-medium text-text-secondary sm:block">
           {demoMode ? "Demo mode" : "Connected mode"}
         </div>
         <Button
@@ -69,7 +70,7 @@ export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
         </Button>
       </div>
       {patientsWarning ? (
-        <p className="absolute right-6 top-[72px] hidden text-[11px] text-[#B45309] lg:block">
+        <p className="absolute right-6 top-[72px] hidden text-[11px] text-warning-text lg:block">
           {patientsWarning}
         </p>
       ) : null}

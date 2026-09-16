@@ -48,7 +48,7 @@ export function TabsList({
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-1 rounded-full bg-[#F2F4F7] p-1",
+        "inline-flex items-center gap-1 rounded-full bg-surface-subtle p-1",
         className
       )}
     >
@@ -79,8 +79,8 @@ export function TabsTrigger({
       className={cn(
         "px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors",
         active
-          ? "bg-[#111111] text-white"
-          : "text-[#667085] hover:text-[#101828]",
+          ? "bg-pill-active text-white"
+          : "text-text-secondary hover:text-text-primary",
         className
       )}
       onClick={(event) => {

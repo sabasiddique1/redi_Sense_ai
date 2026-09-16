@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { CopilotDrawer } from "@/components/copilot/CopilotDrawer";
 import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
+import { useAppState } from "@/hooks/useAppState";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/", key: "dashboard", icon: "LayoutDashboard" },
@@ -21,11 +22,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const [copilotOpen, setCopilotOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAppState();
 
   return (
     <div className="app-shell flex h-screen w-full overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
-      <div className="app-shell-inner relative flex w-full max-w-[1440px] shrink-0 self-stretch overflow-hidden rounded-[28px] border border-[#E6ECF5] bg-[#F4F7FB] shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
+      <div className="app-shell-inner relative flex w-full max-w-[1440px] shrink-0 self-stretch overflow-hidden rounded-[28px] border border-border-subtle bg-app-background shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
         <Sidebar
+          user={user}
           expanded={expanded}
           onToggle={() => setExpanded((v) => !v)}
           navItems={NAV_ITEMS}

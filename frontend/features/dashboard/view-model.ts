@@ -5,22 +5,16 @@ import type { UrgentAlert } from "../shared/AlertCard";
 import type { Insight } from "../shared/InsightCard";
 import type { RiskBucket } from "../shared/RiskDistributionChart";
 import type { RecentActivityItem } from "../shared/RecentActivityPanel";
+import { normalizeRiskLevel, riskClasses } from "../shared/risk.ts";
 
 export type DashboardViewData = {
+  riskWindowDays: number;
   metrics: Metric[];
   reportsQueue: ReportRow[];
   urgentAlerts: UrgentAlert[];
   aiInsight: Insight;
   riskDistribution: RiskBucket[];
   recentActivity: RecentActivityItem[];
-};
-
-// Same swatches the demo snapshot uses; tokenised in the UI polish pass.
-const RISK_BUCKET_COLORS: Record<string, string> = {
-  Low: "bg-[#22C55E]",
-  Moderate: "bg-[#F59E0B]",
-  High: "bg-[#F97316]",
-  Critical: "bg-[#EF4444]",
 };
 
 export function formatActivityTime(
@@ -49,6 +43,7 @@ export function mapDashboardSummary(
   now: Date = new Date(),
 ): DashboardViewData {
   return {
+    riskWindowDays: summary.risk_window_days,
     metrics: summary.metrics.map((metric) => ({
       id: metric.id,
       label: metric.label,
@@ -56,6 +51,12 @@ export function mapDashboardSummary(
       trend: metric.trend,
       trendLabel: metric.trend_label,
       pill: metric.pill ?? undefined,
+      accent:
+        metric.id === "high-risk"
+          ? Number(metric.value) > 0
+            ? "Critical"
+            : "Low"
+          : undefined,
     })),
     reportsQueue: summary.reports_queue.map((row) => ({
       id: row.id,
@@ -82,7 +83,7 @@ export function mapDashboardSummary(
     riskDistribution: summary.risk_distribution.map((bucket) => ({
       label: bucket.label,
       value: bucket.value,
-      color: RISK_BUCKET_COLORS[bucket.label] ?? "bg-[#98A2B3]",
+      color: riskClasses(normalizeRiskLevel(bucket.label)).bar,
     })),
     recentActivity: summary.recent_activity.map((item) => ({
       id: item.id,
