@@ -113,6 +113,10 @@ export function CopilotDrawer({
   const [closedConversationIds, setClosedConversationIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadingConversationId, setLoadingConversationId] = useState<number | null>(null);
+  // Guard against null === null: with no prior conversations the drawer must
+  // not look like it is loading, and Send must stay enabled.
+  const isLoadingActiveConversation =
+    activeConversationId != null && loadingConversationId === activeConversationId;
   const [error, setError] = useState<string | null>(null);
 
   const visibleTabs = conversationTabs.filter(
@@ -450,13 +454,13 @@ export function CopilotDrawer({
         </div>
 
         <div className="flex-1 space-y-3 overflow-y-auto px-5 py-4">
-          {loadingConversationId === activeConversationId && messages.length === 0 ? (
+          {isLoadingActiveConversation && messages.length === 0 ? (
             <div className="rounded-[20px] border border-dashed border-border-subtle bg-surface-muted p-4 text-sm text-text-secondary">
               Loading conversation…
             </div>
           ) : null}
 
-          {messages.length === 0 && loadingConversationId !== activeConversationId ? (
+          {messages.length === 0 && !isLoadingActiveConversation ? (
             <div className="rounded-[20px] border border-dashed border-border-subtle bg-surface-muted p-4 text-sm text-text-secondary">
               Ask about a report, triage concern, or evidence question. Responses are
               clinical decision support only and should be verified before use.
@@ -554,7 +558,7 @@ export function CopilotDrawer({
             <Button
               onClick={() => void handleSend()}
               loading={loading}
-              disabled={loadingConversationId === activeConversationId}
+              disabled={isLoadingActiveConversation}
             >
               <Send className="h-4 w-4" />
               Send
