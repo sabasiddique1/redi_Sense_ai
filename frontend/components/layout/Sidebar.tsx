@@ -61,7 +61,7 @@ export function Sidebar({
           {expanded && (
             <div className="flex flex-col">
               <span className="text-sm font-semibold tracking-tight text-[#101828]">
-                ReportIQ
+                RediSense
               </span>
               <span className="text-[11px] text-[#667085]">
                 AI Healthcare Copilot

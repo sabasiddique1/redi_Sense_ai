@@ -11,9 +11,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "ReportIQ | AI Healthcare Copilot",
+  title: "RediSense | AI Healthcare Copilot",
   description:
-    "ReportIQ is an AI healthcare copilot for medical report analysis, symptom triage, and evidence-backed clinical guidance.",
+    "RediSense is an AI healthcare copilot for medical report analysis, symptom triage, and evidence-backed clinical guidance.",
 };
 
 export default function RootLayout({

@@ -42,6 +42,6 @@ export const mockTimelineEvents = [
     date: "2025-02-15",
     time: "11:00",
     title: "AI summary accepted",
-    detail: "ReportIQ summary attached to prior CT report.",
+    detail: "RediSense summary attached to prior CT report.",
   },
 ];

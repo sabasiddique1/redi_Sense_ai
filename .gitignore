@@ -47,7 +47,9 @@
 # =========================
 .env*
 /backend/.env*
+!/backend/.env.example
 /frontend/.env*
+!/frontend/.env.example
 
 # =========================
 # Project generated files

@@ -57,7 +57,7 @@ def build_copilot_rag_prompts(
   patient_block = patient_context.strip() if patient_context else "No patient context provided."
 
   system_prompt = (
-    "You are ReportIQ, a healthcare copilot that must answer conservatively and stay grounded. "
+    "You are RediSense, a healthcare copilot that must answer conservatively and stay grounded. "
     "Use only the supplied patient context and retrieved evidence passages. "
     "Do not invent diagnoses, source citations, treatment orders, or facts that are not present. "
     "If the evidence is insufficient for the question, say so clearly. "

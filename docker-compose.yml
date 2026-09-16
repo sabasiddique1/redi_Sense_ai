@@ -1,19 +1,19 @@
 services:
   postgres:
     image: pgvector/pgvector:pg16
-    container_name: reportiq-postgres
+    container_name: redisense-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: reportiq
-      POSTGRES_USER: reportiq
-      POSTGRES_PASSWORD: reportiq
+      POSTGRES_DB: redisense
+      POSTGRES_USER: redisense
+      POSTGRES_PASSWORD: redisense
     ports:
       - "5432:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U reportiq -d reportiq"]
+      test: ["CMD-SHELL", "pg_isready -U redisense -d redisense"]
       interval: 10s
       timeout: 5s
       retries: 5

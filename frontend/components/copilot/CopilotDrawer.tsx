@@ -388,7 +388,7 @@ export function CopilotDrawer({
           <div>
             <div className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-[#4C8DFF]" />
-              <h3 className="text-sm font-semibold text-[#101828]">ReportIQ Copilot</h3>
+              <h3 className="text-sm font-semibold text-[#101828]">RediSense Copilot</h3>
             </div>
             <p className="mt-1 text-[11px] text-[#667085]">
               {selectedPatient

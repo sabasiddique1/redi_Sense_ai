@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { mockPatientProfile } from "@/features/mock-data/patient-profile";
-import { apiBaseUrl, apiClient } from "@/lib/api";
+import { apiBaseUrl, apiClient, readStorageWithLegacyFallback } from "@/lib/api";
 import type {
   PatientListItem,
   PublicConfigResponse,
@@ -18,9 +18,13 @@ import type {
 } from "@/lib/contracts";
 
 
-const DEMO_MODE_KEY = "reportiq-demo-mode";
-const SELECTED_PATIENT_KEY = "reportiq-selected-patient";
-const TRIAGE_STATE_KEY = "reportiq-triage-state";
+const DEMO_MODE_KEY = "redisense-demo-mode";
+const SELECTED_PATIENT_KEY = "redisense-selected-patient";
+const TRIAGE_STATE_KEY = "redisense-triage-state";
+// Pre-rename keys; read once and migrated by readStorageWithLegacyFallback.
+const LEGACY_DEMO_MODE_KEY = "reportiq-demo-mode";
+const LEGACY_SELECTED_PATIENT_KEY = "reportiq-selected-patient";
+const LEGACY_TRIAGE_STATE_KEY = "reportiq-triage-state";
 
 type SavedTriageState = {
   draft: TriageDraft;
@@ -71,7 +75,11 @@ function readStoredTriageStates(): Record<string, SavedTriageState> {
     return {};
   }
 
-  const storedValue = window.localStorage.getItem(TRIAGE_STATE_KEY);
+  const storedValue = readStorageWithLegacyFallback(
+    window.localStorage,
+    TRIAGE_STATE_KEY,
+    LEGACY_TRIAGE_STATE_KEY,
+  );
   if (!storedValue) {
     return {};
   }
@@ -114,7 +122,11 @@ function readStoredDemoMode(): boolean {
     return initialDemoMode;
   }
 
-  const storedDemoMode = window.localStorage.getItem(DEMO_MODE_KEY);
+  const storedDemoMode = readStorageWithLegacyFallback(
+    window.localStorage,
+    DEMO_MODE_KEY,
+    LEGACY_DEMO_MODE_KEY,
+  );
   return storedDemoMode !== null ? storedDemoMode === "true" : initialDemoMode;
 }
 
@@ -123,7 +135,11 @@ function readStoredPatientId(): number | null {
     return 1;
   }
 
-  const storedPatientId = window.localStorage.getItem(SELECTED_PATIENT_KEY);
+  const storedPatientId = readStorageWithLegacyFallback(
+    window.localStorage,
+    SELECTED_PATIENT_KEY,
+    LEGACY_SELECTED_PATIENT_KEY,
+  );
   if (!storedPatientId) {
     return 1;
   }

@@ -126,7 +126,7 @@ export const mockDashboardData: DashboardMockData = {
       id: "ra1",
       time: "08:32",
       label: "AI summary accepted",
-      detail: "ReportIQ summary attached to MRI brain report for S. Ali.",
+      detail: "RediSense summary attached to MRI brain report for S. Ali.",
     },
     {
       id: "ra2",

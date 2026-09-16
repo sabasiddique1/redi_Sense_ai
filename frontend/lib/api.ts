@@ -29,7 +29,37 @@ const EVIDENCE_SEARCH_TIMEOUT_MS = parsePositiveInt(
   process.env.NEXT_PUBLIC_EVIDENCE_SEARCH_TIMEOUT_MS,
   15_000,
 );
-const AUTH_TOKEN_STORAGE_KEY = "reportiq-auth-token";
+/**
+ * Reads a localStorage value by its current key, falling back once to a legacy
+ * key. When only the legacy key holds a value it is copied to the new key and
+ * the legacy entry is removed, so the migration runs a single time per browser.
+ */
+export function readStorageWithLegacyFallback(
+  storage: Pick<Storage, "getItem" | "setItem" | "removeItem">,
+  key: string,
+  legacyKey: string,
+): string | null {
+  const current = storage.getItem(key);
+  if (current !== null) {
+    return current;
+  }
+
+  const legacy = storage.getItem(legacyKey);
+  if (legacy === null) {
+    return null;
+  }
+
+  try {
+    storage.setItem(key, legacy);
+    storage.removeItem(legacyKey);
+  } catch {
+    // Storage may be full or read-only; still return the legacy value.
+  }
+  return legacy;
+}
+
+const AUTH_TOKEN_STORAGE_KEY = "redisense-auth-token";
+const LEGACY_AUTH_TOKEN_STORAGE_KEY = "reportiq-auth-token";
 
 type FallbackOptions<T> = {
   demoMode?: boolean;
@@ -68,7 +98,11 @@ function getAuthToken(): string | null {
   if (typeof window === "undefined") {
     return null;
   }
-  return window.localStorage.getItem(AUTH_TOKEN_STORAGE_KEY);
+  return readStorageWithLegacyFallback(
+    window.localStorage,
+    AUTH_TOKEN_STORAGE_KEY,
+    LEGACY_AUTH_TOKEN_STORAGE_KEY,
+  );
 }
 
 function buildHeaders(initial?: HeadersInit): Headers {

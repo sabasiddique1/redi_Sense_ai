@@ -1,6 +1,6 @@
-# ReportIQ Testing Guide
+# RediSense Testing Guide
 
-This guide covers how to start ReportIQ locally and how to test each major workflow in both connected mode and demo fallback mode.
+This guide covers how to start RediSense locally and how to test each major workflow in both connected mode and demo fallback mode.
 
 ## 1. Prerequisites
 
@@ -34,7 +34,7 @@ cp frontend/.env.example frontend/.env.local
 
 Default values:
 
-- Backend database URL: `postgresql+psycopg2://reportiq:reportiq@localhost:5432/reportiq`
+- Backend database URL: `postgresql+psycopg2://redisense:redisense@localhost:5432/redisense`
 - Frontend API base URL: `http://localhost:8000`
 - Frontend demo mode default: `false`
 
@@ -54,14 +54,14 @@ docker compose ps
 
 Expected:
 
-- Container `reportiq-postgres` is running
+- Container `redisense-postgres` is running
 - Health status becomes healthy
 
 Default local DB credentials:
 
-- Database: `reportiq`
-- User: `reportiq`
-- Password: `reportiq`
+- Database: `redisense`
+- User: `redisense`
+- Password: `redisense`
 - Port: `5432`
 
 Quick DB check:
@@ -109,7 +109,18 @@ Optional root shortcut after the initial frontend install:
 npm run dev
 ```
 
-## 6. Smoke Tests
+## 6. Automated Tests
+
+```bash
+npm --prefix frontend run typecheck
+npm --prefix frontend run lint
+npm --prefix frontend run test
+python -m pytest backend/tests -q
+```
+
+The backend suite uses an in-memory fake session and does not need Postgres. CI runs all of these plus `next build`.
+
+## 7. Smoke Tests
 
 ### Backend health
 
@@ -148,7 +159,7 @@ Expected:
 - At least one patient
 - Seeded patient with `id=1`
 
-## 7. Workflow Tests
+## 8. Workflow Tests
 
 ### A. Patient Context
 
@@ -364,7 +375,7 @@ Expected:
 - No secret backend values are exposed
 - Demo toggle changes frontend behavior without breaking routing
 
-## 8. Demo Mode Tests
+## 9. Demo Mode Tests
 
 Enable demo mode in either of these ways:
 
@@ -389,7 +400,7 @@ Expected:
 - Frontend remains usable
 - API failures degrade to demo behavior where implemented
 
-## 9. Auth Tests
+## 10. Auth Tests
 
 Local dev bypass:
 
@@ -407,7 +418,7 @@ Expected:
 - Requests to protected routes are rejected
 - `/api/system/config` remains reachable
 
-## 10. Current Known Local Blocker
+## 11. Current Known Local Blocker
 
 Connected mode migrations require:
 
@@ -434,7 +445,7 @@ Without that extension:
 - `/health` can still return `200`
 - Real app routes such as `/api/patient` will fail because tables were never migrated
 
-## 11. Troubleshooting
+## 12. Troubleshooting
 
 ### `docker: command not found`
 
@@ -467,7 +478,7 @@ python -m backend.scripts.ingest_evidence
 - `OPENAI_API_KEY` is likely unset
 - The app is falling back to heuristic mode by design
 
-## 12. Minimum Acceptance Checklist
+## 13. Minimum Acceptance Checklist
 
 - `docker compose up -d postgres` succeeds
 - `alembic upgrade head` succeeds
