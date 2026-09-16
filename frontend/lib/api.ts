@@ -4,6 +4,7 @@ import type {
   CopilotChatResponse,
   CopilotConversationResponse,
   CopilotConversationSummary,
+  DashboardSummaryResponse,
   EvidenceSearchResponse,
   PatientListItem,
   PatientProfileResponse,
@@ -297,6 +298,13 @@ function uploadMultipart<T>(
 export const apiClient = {
   fetchPublicConfig(): Promise<PublicConfigResponse> {
     return requestJson<PublicConfigResponse>("/api/system/config");
+  },
+
+  fetchDashboardSummary(options?: FallbackOptions<DashboardSummaryResponse>) {
+    return withDemoFallback(
+      () => requestJson<DashboardSummaryResponse>("/api/dashboard/summary"),
+      options,
+    );
   },
 
   fetchPatients(options?: FallbackOptions<PatientListItem[]>) {

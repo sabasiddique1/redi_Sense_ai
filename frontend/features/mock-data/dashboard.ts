@@ -4,6 +4,10 @@ import type { UrgentAlert } from "../shared/AlertCard";
 import type { Insight } from "../shared/InsightCard";
 import type { RiskBucket } from "../shared/RiskDistributionChart";
 import type { RecentActivityItem } from "../shared/RecentActivityPanel";
+import type {
+  DashboardRiskLevel,
+  DashboardSummaryResponse,
+} from "../../lib/contracts";
 
 interface DashboardMockData {
   metrics: Metric[];
@@ -143,3 +147,61 @@ export const mockDashboardData: DashboardMockData = {
   ],
 };
 
+
+const RISK_LEVELS: DashboardRiskLevel[] = ["Low", "Moderate", "High", "Critical"];
+
+function todayAt(hhmm: string): string {
+  const [hours, minutes] = hhmm.split(":").map(Number);
+  const date = new Date();
+  date.setHours(hours ?? 0, minutes ?? 0, 0, 0);
+  return date.toISOString();
+}
+
+/** The demo snapshot in the same shape the backend returns, so the page has one render path. */
+export function buildDemoDashboardSummary(): DashboardSummaryResponse {
+  const data = mockDashboardData;
+  return {
+    generated_at: new Date().toISOString(),
+    risk_window_days: 7,
+    metrics: data.metrics.map((metric) => ({
+      id: metric.id,
+      label: metric.label,
+      value: metric.value,
+      trend: metric.trend,
+      trend_label: metric.trendLabel,
+      pill: metric.pill ?? null,
+    })),
+    reports_queue: data.reportsQueue.map((row) => ({
+      id: row.id,
+      patient_name: row.patientName,
+      patient_id: row.patientId,
+      modality: row.modality,
+      summary: row.summary,
+      risk: row.risk,
+      received_at: todayAt(row.receivedAt),
+    })),
+    urgent_alerts: data.urgentAlerts.map((alert) => ({
+      id: alert.id,
+      label: alert.label,
+      patient_name: alert.patientName,
+      detail: alert.detail,
+      severity: alert.severity,
+    })),
+    ai_insight: { ...data.aiInsight },
+    risk_distribution: data.riskDistribution
+      .filter((bucket): bucket is RiskBucket & { label: DashboardRiskLevel } =>
+        (RISK_LEVELS as string[]).includes(bucket.label),
+      )
+      .map((bucket) => ({ label: bucket.label, value: bucket.value })),
+    recent_activity: data.recentActivity.map((item) => ({
+      id: item.id,
+      timestamp: todayAt(item.time),
+      label: item.label,
+      detail: item.detail,
+      event_type: "demo",
+      patient_id: null,
+    })),
+    disclaimer: "Clinical decision support only. Verify findings with licensed clinical judgment.",
+    mode: "real",
+  };
+}

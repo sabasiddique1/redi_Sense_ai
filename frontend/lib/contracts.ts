@@ -392,3 +392,66 @@ export type PublicConfigResponse = {
   openai_chat_model: string;
   openai_embedding_model: string;
 };
+
+export type DashboardRiskLevel = "Low" | "Moderate" | "High" | "Critical";
+
+export type DashboardMetric = {
+  id: string;
+  label: string;
+  value: string;
+  trend: "up" | "down" | "neutral";
+  trend_label: string;
+  pill: string | null;
+};
+
+export type DashboardReportRow = {
+  id: string;
+  patient_name: string;
+  patient_id: string;
+  modality: string;
+  summary: string;
+  risk: DashboardRiskLevel;
+  received_at: string | null;
+};
+
+export type DashboardAlert = {
+  id: string;
+  label: string;
+  patient_name: string;
+  detail: string;
+  severity: "High" | "Critical";
+};
+
+export type DashboardInsight = {
+  id: string;
+  title: string;
+  summary: string;
+  confidence: number;
+};
+
+export type DashboardRiskBucket = {
+  label: DashboardRiskLevel;
+  value: number;
+};
+
+export type DashboardActivityItem = {
+  id: string;
+  timestamp: string | null;
+  label: string;
+  detail: string;
+  event_type: string;
+  patient_id: number | null;
+};
+
+export type DashboardSummaryResponse = {
+  generated_at: string;
+  risk_window_days: number;
+  metrics: DashboardMetric[];
+  reports_queue: DashboardReportRow[];
+  urgent_alerts: DashboardAlert[];
+  ai_insight: DashboardInsight;
+  risk_distribution: DashboardRiskBucket[];
+  recent_activity: DashboardActivityItem[];
+  disclaimer: string;
+  mode: "real";
+};

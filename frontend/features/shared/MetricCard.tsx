@@ -1,11 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3, AlertTriangle, Clock, FileCheck } from "lucide-react";
+import { BarChart3, AlertTriangle, Clock, FileCheck, Users } from "lucide-react";
 
 const METRIC_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
   "reports-today": BarChart3,
   "high-risk": AlertTriangle,
   "triage-time": Clock,
+  "active-patients": Users,
   "evidence-linked": FileCheck,
 };
 
