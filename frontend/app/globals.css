@@ -280,9 +280,23 @@
   --shadow-elevation-3: var(--rs-elevation-3);
   --shadow-soft: var(--rs-elevation-0);
 
-  /* Type scale */
+  /* Type scale (design sizes; line-heights tuned for dense clinical UI) */
   --text-2xs: var(--rs-text-2xs);
   --text-2xs--line-height: 1.4;
+  --text-xs: var(--rs-text-xs);
+  --text-xs--line-height: 1.4;
+  --text-sm: var(--rs-text-sm);
+  --text-sm--line-height: 1.45;
+  --text-base: var(--rs-text-md);
+  --text-base--line-height: 1.5;
+  --text-lg: var(--rs-text-lg);
+  --text-lg--line-height: 1.4;
+  --text-xl: var(--rs-text-xl);
+  --text-xl--line-height: 1.3;
+  --text-2xl: var(--rs-text-2xl);
+  --text-2xl--line-height: 1.2;
+  --text-3xl: var(--rs-text-3xl);
+  --text-3xl--line-height: 1.1;
 }
 
 body {
