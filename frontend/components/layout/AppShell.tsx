@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { CopilotDrawer } from "@/components/copilot/CopilotDrawer";
 import { Sidebar } from "./Sidebar";
 import { TopNav } from "./TopNav";
+import { useAppState } from "@/hooks/useAppState";
 
 const NAV_ITEMS = [
   { label: "Dashboard", href: "/", key: "dashboard", icon: "LayoutDashboard" },
@@ -17,29 +17,31 @@ const NAV_ITEMS = [
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const [expanded, setExpanded] = useState(true);
-  const [copilotOpen, setCopilotOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { user, copilotOpen, openCopilot, closeCopilot, sidebarCollapsed, setSidebarCollapsed } = useAppState();
 
   return (
-    <div className="app-shell flex h-screen w-full overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
-      <div className="app-shell-inner relative flex w-full max-w-[1440px] shrink-0 self-stretch overflow-hidden rounded-[28px] border border-[#E6ECF5] bg-[#F4F7FB] shadow-[0_20px_60px_rgba(15,23,42,0.10)]">
-        <Sidebar
-          expanded={expanded}
-          onToggle={() => setExpanded((v) => !v)}
-          navItems={NAV_ITEMS}
-          activeHref={pathname || "/"}
-          onNavigate={(href) => router.push(href)}
-        />
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <TopNav onOpenCopilot={() => setCopilotOpen(true)} />
-          <main className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6">
-            {children}
-          </main>
-        </div>
-        <CopilotDrawer open={copilotOpen} onClose={() => setCopilotOpen(false)} />
+    <div className="app-shell relative flex h-screen w-full overflow-hidden">
+      <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-ink-900">
+        Skip to content
+      </a>
+      <Sidebar
+        user={user}
+        expanded={!sidebarCollapsed}
+        onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
+        navItems={NAV_ITEMS}
+        activeHref={pathname || "/"}
+        onNavigate={(href) => router.push(href)}
+      />
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <TopNav onOpenCopilot={() => openCopilot()} pathname={pathname || "/"} />
+        {/* tabIndex=0: the scroll region must be keyboard-reachable even when a page has no focusable content (axe: scrollable-region-focusable) */}
+        <main id="main" className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6" tabIndex={0}>
+          {children}
+        </main>
       </div>
+      <CopilotDrawer open={copilotOpen} onClose={closeCopilot} />
     </div>
   );
 }

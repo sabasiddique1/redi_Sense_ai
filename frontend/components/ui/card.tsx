@@ -9,8 +9,8 @@ export function Card({ className, muted, ...props }: CardProps) {
   return (
     <div
       className={cn(
-        "rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]",
-        muted && "bg-[#F8FAFD]",
+        "rounded-[20px] border border-border-subtle bg-surface shadow-soft",
+        muted && "bg-surface-muted",
         className
       )}
       {...props}
@@ -40,7 +40,7 @@ export function CardTitle({
   return (
     <h3
       className={cn(
-        "text-sm font-semibold tracking-[-0.01em] text-[#101828]",
+        "text-sm font-semibold tracking-[-0.01em] text-text-primary",
         className
       )}
       {...props}
@@ -55,7 +55,7 @@ export function CardDescription({
   return (
     <p
       className={cn(
-        "text-xs text-[#667085] leading-relaxed",
+        "text-xs text-text-secondary leading-relaxed",
         className
       )}
       {...props}

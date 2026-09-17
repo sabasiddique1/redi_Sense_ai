@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  body { margin:0; }
+  * { box-sizing: border-box; }
+  ::selection { background: oklch(93% 0.035 195); }
+</style>
+</helmet>
+
+<div style="--rs-bg-shell: #F6F8FB; --rs-bg-canvas: #F6F8FB; --rs-surface: #FFFFFF; --rs-surface-raised: #FFFFFF; --rs-surface-sunken: #EEF2F7; --rs-border-hairline: #DCE3EE; --rs-border-strong: #C3CEDF; --rs-border-focus: #0D9488; --rs-ink-900: #0B1220; --rs-ink-700: #33415A; --rs-ink-500: #4B5A75; --rs-ink-400: #7B8AA3; --rs-ink-300: #AEB9CC; --rs-ink-on-accent: #FFFFFF; --rs-accent-700: #0F766E; --rs-accent-600: #0D9488; --rs-accent-500: #14B8A6; --rs-accent-100: #CCFBF1; --rs-accent-050: #F0FDFA; --rs-accent-glow: rgba(13,148,136,0.12); --rs-data-2: #4F46E5; --rs-severity-low: oklch(52% 0.1 195); --rs-severity-low-bg: oklch(95% 0.02 195); --rs-severity-moderate: oklch(56% 0.15 95); --rs-severity-moderate-bg: oklch(95% 0.04 95); --rs-severity-high: oklch(52% 0.17 55); --rs-severity-high-bg: oklch(95% 0.045 55); --rs-severity-critical: oklch(46% 0.19 25); --rs-severity-critical-bg: oklch(95% 0.045 25); --rs-font-sans: 'Nunito Sans', Figtree, ui-sans-serif, system-ui, sans-serif; --rs-font-mono: 'DM Mono', ui-monospace, monospace; --rs-text-2xs: 11px; --rs-text-xs: 12px; --rs-text-sm: 13px; --rs-text-md: 14px; --rs-text-lg: 16px; --rs-text-xl: 20px; --rs-text-2xl: 28px; --rs-text-3xl: 36px; --rs-weight-regular: 400; --rs-weight-medium: 500; --rs-weight-semibold: 600; --rs-weight-bold: 700; --rs-space-1: 4px; --rs-space-2: 8px; --rs-space-3: 12px; --rs-space-4: 16px; --rs-space-5: 20px; --rs-space-6: 24px; --rs-space-8: 32px; --rs-space-10: 40px; --rs-space-12: 48px; --rs-space-16: 64px; --rs-radius-xs: 3px; --rs-radius-sm: 6px; --rs-radius-md: 8px; --rs-radius-lg: 12px; --rs-radius-pill: 999px; --rs-elevation-0: none; --rs-elevation-1: 0 1px 2px oklch(21% 0.012 195 / 0.07); --rs-elevation-2: 0 4px 14px oklch(21% 0.012 195 / 0.10); --rs-elevation-3: 0 12px 32px oklch(21% 0.012 195 / 0.14); --rs-motion-fast: 120ms; --rs-motion-base: 180ms; --rs-motion-slow: 260ms; --rs-motion-ease: cubic-bezier(0.2,0,0,1); font-family: var(--rs-font-sans); color: var(--rs-ink-900); background: var(--rs-bg-shell); background-image: repeating-linear-gradient(0deg, oklch(21% 0.012 195 / 0.014) 0 1px, transparent 1px 4px), repeating-linear-gradient(90deg, oklch(21% 0.012 195 / 0.014) 0 1px, transparent 1px 4px); min-height: 100vh; font-variant-numeric: tabular-nums;">
+
+  <div style="max-width: 1280px; margin: 0 auto; padding: var(--rs-space-10) var(--rs-space-6) var(--rs-space-16);">
+
+    <header style="display:flex; align-items:flex-end; justify-content:space-between; gap: var(--rs-space-6); padding-bottom: var(--rs-space-6); border-bottom: 1px solid var(--rs-border-strong); margin-bottom: var(--rs-space-10);">
+      <div>
+        <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-500); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: var(--rs-space-2);">RediSense · Design Foundations</div>
+        <h1 style="font-size: var(--rs-text-3xl); font-weight: var(--rs-weight-semibold); margin: 0; letter-spacing: -0.015em;">Token sheet &amp; component specimens</h1>
+        <p style="font-size: var(--rs-text-md); color: var(--rs-ink-700); margin: var(--rs-space-2) 0 0; max-width: 640px;">Deliverable 1 of 9 — foundations only, revised per feedback (warmer humanist type, mono restricted to identifiers).</p>
+      </div>
+      <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right; white-space:nowrap;">v0.2 — 2026-09-17<br/>light mode primary</div>
+    </header>
+
+    <div style="background: var(--rs-accent-050); border:1px solid var(--rs-accent-100); border-radius: var(--rs-radius-md); padding: var(--rs-space-4) var(--rs-space-5); margin-bottom: var(--rs-space-8); font-size: var(--rs-text-xs); color: var(--rs-ink-700); line-height:1.8;">
+      <b style="color:var(--rs-ink-900);">v0.3 — colour &amp; atmosphere pass, token changes (old → new)</b><br/>
+      --rs-accent-600: oklch(46% 0.1 195) → #0D9488 (clearer clinical teal)<br/>
+      --rs-ink-900/700/500/400/300: cool grey → cool slate-navy (#0B1220 / #33415A / #4B5A75 / #7B8AA3 / #AEB9CC)<br/>
+      --rs-bg-canvas: oklch(98% 0.008 75) warm off-white → #F6F8FB cool white; --rs-surface-sunken → #EEF2F7; --rs-border-hairline → #DCE3EE<br/>
+      Added --rs-accent-glow (12% light / 18% dark) for focus rings, active nav, chart fills, verdict-block glow<br/>
+      Added --rs-data-2 (#4F46E5 indigo) — the one non-severity chart colour, for trend lines/segments that aren't a risk signal<br/>
+      Severity hues unchanged; lightness lowered slightly (52/56/52/46%) to clear 4.5:1 on tinted backgrounds<br/>
+      Dark variant fully specified — see bottom of page
+    </div>
+
+    <nav style="display:flex; gap: var(--rs-space-5); font-size: var(--rs-text-xs); color: var(--rs-ink-500); margin-bottom: var(--rs-space-12); flex-wrap:wrap;">
+      <a href="#colors" style="color: var(--rs-accent-600); text-decoration:none;">Color</a>
+      <a href="#severity" style="color: var(--rs-accent-600); text-decoration:none;">Severity scale</a>
+      <a href="#type" style="color: var(--rs-accent-600); text-decoration:none;">Typography</a>
+      <a href="#spacing" style="color: var(--rs-accent-600); text-decoration:none;">Spacing &amp; radii</a>
+      <a href="#elevation" style="color: var(--rs-accent-600); text-decoration:none;">Elevation &amp; motion</a>
+      <a href="#components" style="color: var(--rs-accent-600); text-decoration:none;">Component specimens</a>
+      <a href="#dark" style="color: var(--rs-accent-600); text-decoration:none;">Dark variant</a>
+    </nav>
+
+    <section id="colors" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Color</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Near-white surfaces with a cool teal tint on structural chrome, a faint warm off-white on canvas/sunken fields, cool-tinted ink, one restrained accent.</p>
+
+      <div style="display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: var(--rs-space-6);">
+        <div>
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); text-transform:uppercase; letter-spacing:0.05em; margin-bottom: var(--rs-space-3);">Surfaces</div>
+          <div style="display:flex; flex-direction:column; gap: var(--rs-space-2);">
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-hairline); flex-shrink:0; background: var(--rs-bg-shell);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-bg-shell</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(96.5% 0.006 195) · app shell, faint grid texture</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-hairline); flex-shrink:0; background: var(--rs-bg-canvas);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-bg-canvas</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(98% 0.008 75) · page canvas, warm off-white</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-hairline); flex-shrink:0; background: var(--rs-surface);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-surface</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(99.2% 0.003 195) · default card/panel, flat</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-hairline); flex-shrink:0; background: var(--rs-surface-raised); box-shadow: var(--rs-elevation-2);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-surface-raised</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(100% 0 0) · drawer, modal, popover</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-hairline); flex-shrink:0; background: var(--rs-surface-sunken);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-surface-sunken</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(97% 0.01 75) · inputs, table stripe, warm</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); text-transform:uppercase; letter-spacing:0.05em; margin-bottom: var(--rs-space-3);">Ink &amp; borders</div>
+          <div style="display:flex; flex-direction:column; gap: var(--rs-space-2);">
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); flex-shrink:0; background: var(--rs-ink-900);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-ink-900</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(21% 0.012 195) · primary text</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); flex-shrink:0; background: var(--rs-ink-700);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-ink-700</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(36% 0.012 195) · secondary text</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); flex-shrink:0; background: var(--rs-ink-500);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-ink-500</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">oklch(50% 0.012 195) · labels, captions</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); flex-shrink:0; background: var(--rs-ink-300);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-ink-300 / --rs-ink-400</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">disabled text, placeholder</div></div>
+            </div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3); padding: var(--rs-space-2); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md);">
+              <div style="width:36px; height:36px; border-radius: var(--rs-radius-sm); flex-shrink:0; background: var(--rs-surface); border: 2px solid var(--rs-border-hairline);"></div>
+              <div style="min-width:0;"><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-900);">--rs-border-hairline / --rs-border-strong</div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">dividers replace card shadows</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--rs-space-6);">
+        <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); text-transform:uppercase; letter-spacing:0.05em; margin-bottom: var(--rs-space-3);">Accent — used only for actions &amp; focus, never decoratively</div>
+        <div style="display:flex; gap: var(--rs-space-3); flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-700);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">700 active</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-600);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">600 default</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-500);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">500 hover</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-100); border:1px solid var(--rs-border-hairline);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">100 tint</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-050); border:1px solid var(--rs-border-hairline);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">050 tint</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-accent-glow); border:1px solid var(--rs-border-hairline);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">glow (focus/active)</div></div>
+          <div style="display:flex; flex-direction:column; gap:var(--rs-space-1); align-items:center;"><div style="width:64px; height:44px; border-radius: var(--rs-radius-sm); background: var(--rs-data-2);"></div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">data-2 (charts)</div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="severity" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Severity scale — the core visual system</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Color, shape and label together — never color alone. Applied identically across metric cards, queue rows, triage verdicts, alerts and timeline.</p>
+
+      <div style="display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--rs-space-4);">
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; flex-direction:column; gap: var(--rs-space-3); align-items:flex-start;">
+          <span style="width:14px; height:14px; border-radius:50%; background: var(--rs-severity-low); display:block;"></span>
+          <div style="font-size: var(--rs-text-md); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-900);">Low</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">circle · dot</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); border-top:1px solid var(--rs-border-hairline); padding-top: var(--rs-space-2); width:100%;">--rs-severity-low<br/>oklch(56% 0.10 195)</div>
+        </div>
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; flex-direction:column; gap: var(--rs-space-3); align-items:flex-start;">
+          <span style="width:16px; height:16px; background: var(--rs-severity-moderate); display:block; clip-path: polygon(50% 0%, 100% 100%, 0% 100%);"></span>
+          <div style="font-size: var(--rs-text-md); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-900);">Moderate</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">triangle · caution</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); border-top:1px solid var(--rs-border-hairline); padding-top: var(--rs-space-2); width:100%;">--rs-severity-moderate<br/>oklch(62% 0.15 95)</div>
+        </div>
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; flex-direction:column; gap: var(--rs-space-3); align-items:flex-start;">
+          <span style="width:15px; height:15px; background: var(--rs-severity-high); display:block; transform: rotate(45deg);"></span>
+          <div style="font-size: var(--rs-text-md); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-900);">High</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">diamond · elevated</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); border-top:1px solid var(--rs-border-hairline); padding-top: var(--rs-space-2); width:100%;">--rs-severity-high<br/>oklch(58% 0.17 55)</div>
+        </div>
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; flex-direction:column; gap: var(--rs-space-3); align-items:flex-start;">
+          <span style="width:16px; height:16px; background: var(--rs-severity-critical); display:block; clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);"></span>
+          <div style="font-size: var(--rs-text-md); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-900);">Critical</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">octagon · escalate now</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); border-top:1px solid var(--rs-border-hairline); padding-top: var(--rs-space-2); width:100%;">--rs-severity-critical<br/>oklch(52% 0.19 25)</div>
+        </div>
+      </div>
+      <div style="margin-top: var(--rs-space-4); font-size: var(--rs-text-2xs); color: var(--rs-ink-400);">Contrast checked: each severity color at 4.5:1+ against --rs-surface when used as text/icon; tint backgrounds (--rs-severity-*-bg) are fills only, never text.</div>
+    </section>
+
+    <section id="type" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Typography</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Nunito Sans (fallback Figtree) for everything — UI, metric values, verdict headlines, vitals, scores — with tabular numerals throughout. DM Mono is restricted to exactly three uses: MRN chip, timestamps, and raw evidence chunk IDs.</p>
+
+      <div style="display:flex; flex-direction:column; border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); background: var(--rs-surface); overflow:hidden;">
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-3xl); font-weight: var(--rs-weight-semibold); letter-spacing:-0.015em;">128</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-3xl<br/>36px / 600 sans</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-2xl); font-weight: var(--rs-weight-semibold); letter-spacing:-0.01em;">High severity</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-2xl<br/>28px / 600 sans</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold);">Page title</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-xl<br/>20px / 600</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-lg); font-weight: var(--rs-weight-semibold);">Section / card header</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-lg<br/>16px / 600</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-md); font-weight: var(--rs-weight-regular);">Default body copy, findings text</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-md<br/>14px / 400</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-sm); font-weight: var(--rs-weight-regular);">Dense UI default — tables, forms, lists</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-sm<br/>13px / 400</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5); border-bottom:1px solid var(--rs-border-hairline);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-medium); color: var(--rs-ink-500); text-transform:uppercase; letter-spacing:0.04em;">Field labels, table headers, chip text</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-xs<br/>12px / 500</div>
+        </div>
+        <div style="display:grid; grid-template-columns: 1fr 140px; align-items:baseline; padding: var(--rs-space-4) var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-2xs); font-weight: var(--rs-weight-regular); color: var(--rs-ink-500);">Footnotes, disclaimer text</div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); text-align:right;">--rs-text-2xs<br/>11px / 400</div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--rs-space-4); background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; gap: var(--rs-space-8); flex-wrap:wrap;">
+        <div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); margin-bottom:var(--rs-space-1);">MRN — mono</div><div style="font-family: var(--rs-font-mono); font-size: var(--rs-text-md); font-variant-numeric: tabular-nums;">MRN 0042-8817</div></div>
+        <div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); margin-bottom:var(--rs-space-1);">Timestamp — mono</div><div style="font-family: var(--rs-font-mono); font-size: var(--rs-text-md); font-variant-numeric: tabular-nums;">2026-09-17 08:41</div></div>
+        <div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); margin-bottom:var(--rs-space-1);">Evidence chunk ID — mono</div><div style="font-family: var(--rs-font-mono); font-size: var(--rs-text-md); font-variant-numeric: tabular-nums;">chunk_a17f3</div></div>
+        <div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); margin-bottom:var(--rs-space-1);">Vitals — sans, tabular</div><div style="font-size: var(--rs-text-md); font-variant-numeric: tabular-nums;">128/82 · HR 74 · 36.7°C</div></div>
+        <div><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); margin-bottom:var(--rs-space-1);">Confidence — sans, tabular</div><div style="font-size: var(--rs-text-md); font-variant-numeric: tabular-nums;">0.91</div></div>
+      </div>
+    </section>
+
+    <section id="spacing" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Spacing &amp; radii</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">4px base grid, matching the shell texture. Radii are tight — instrument-panel edge, not soft SaaS.</p>
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap: var(--rs-space-8);">
+        <div>
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); text-transform:uppercase; letter-spacing:0.05em; margin-bottom: var(--rs-space-3);">Spacing scale</div>
+          <div style="display:flex; flex-direction:column; gap: var(--rs-space-2);">
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:4px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-1 · 4px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:8px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-2 · 8px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:12px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-3 · 12px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:16px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-4 · 16px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:24px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-6 · 24px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:32px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-8 · 32px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:48px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-12 · 48px</span></div>
+            <div style="display:flex; align-items:center; gap: var(--rs-space-3);"><div style="width:64px; height:14px; background: var(--rs-accent-600);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-space-16 · 64px</span></div>
+          </div>
+        </div>
+        <div>
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); text-transform:uppercase; letter-spacing:0.05em; margin-bottom: var(--rs-space-3);">Radii</div>
+          <div style="display:flex; gap: var(--rs-space-4); flex-wrap:wrap;">
+            <div style="display:flex; flex-direction:column; align-items:center; gap: var(--rs-space-1);"><div style="width:56px; height:40px; border:1.5px solid var(--rs-ink-700); border-radius: var(--rs-radius-xs);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">xs 3px</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap: var(--rs-space-1);"><div style="width:56px; height:40px; border:1.5px solid var(--rs-ink-700); border-radius: var(--rs-radius-sm);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">sm 6px</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap: var(--rs-space-1);"><div style="width:56px; height:40px; border:1.5px solid var(--rs-ink-700); border-radius: var(--rs-radius-md);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">md 8px</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap: var(--rs-space-1);"><div style="width:56px; height:40px; border:1.5px solid var(--rs-ink-700); border-radius: var(--rs-radius-lg);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">lg 12px</span></div>
+            <div style="display:flex; flex-direction:column; align-items:center; gap: var(--rs-space-1);"><div style="width:56px; height:40px; border:1.5px solid var(--rs-ink-700); border-radius: var(--rs-radius-pill);"></div><span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">pill (status only)</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="elevation" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Elevation &amp; motion</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Hairlines do most of the separating work. Shadow is reserved for things that float above content: drawer, popover, modal.</p>
+      <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--rs-space-6); margin-bottom: var(--rs-space-6);">
+        <div style="background: var(--rs-surface-raised); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); border:1px solid var(--rs-border-hairline);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-elevation-1</div><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-700); margin-top:var(--rs-space-1);">panel resting state</div></div>
+        <div style="background: var(--rs-surface-raised); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); box-shadow: var(--rs-elevation-2);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-elevation-2</div><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-700); margin-top:var(--rs-space-1);">Copilot drawer, popover</div></div>
+        <div style="background: var(--rs-surface-raised); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); box-shadow: var(--rs-elevation-3);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">--rs-elevation-3</div><div style="font-size: var(--rs-text-xs); color: var(--rs-ink-700); margin-top:var(--rs-space-1);">modal, confirm dialog</div></div>
+      </div>
+      <div style="display:flex; gap: var(--rs-space-8); font-size: var(--rs-text-xs); color: var(--rs-ink-700); flex-wrap:wrap;">
+        <div>--rs-motion-fast <span style="color:var(--rs-ink-400);">120ms</span> — hover, focus rings</div>
+        <div>--rs-motion-base <span style="color:var(--rs-ink-400);">180ms</span> — drawer, dropdown</div>
+        <div>--rs-motion-slow <span style="color:var(--rs-ink-400);">260ms</span> — modal, page transition</div>
+        <div>--rs-motion-ease <span style="color:var(--rs-ink-400);">cubic-bezier(0.2,0,0,1)</span></div>
+      </div>
+    </section>
+
+    <section id="components" style="margin-bottom: var(--rs-space-16);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Component specimens</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Every token used is annotated below each specimen.</p>
+
+      <div style="display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: var(--rs-space-6);">
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Severity chip</div>
+          <div style="display:flex; gap: var(--rs-space-2); flex-wrap:wrap;">
+            <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-critical-bg); font-size: var(--rs-text-xs); font-weight: var(--rs-weight-medium); color: var(--rs-severity-critical);"><span style="width:8px; height:8px; background: var(--rs-severity-critical); display:inline-block; clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);"></span>Critical</span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-low-bg); font-size: var(--rs-text-xs); font-weight: var(--rs-weight-medium); color: var(--rs-severity-low);"><span style="width:8px; height:8px; background: var(--rs-severity-low); display:inline-block; border-radius:50%;"></span>Low</span>
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-severity-*, --rs-severity-*-bg, --rs-radius-xs, --rs-text-xs</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">MRN chip</div>
+          <span style="display:inline-flex; align-items:center; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-surface-sunken); border:1px solid var(--rs-border-hairline); font-family: var(--rs-font-mono); font-size: var(--rs-text-xs); color: var(--rs-ink-700); font-variant-numeric: tabular-nums;">MRN 0042-8817</span>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-surface-sunken, --rs-font-mono, --rs-radius-xs</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Modality tag</div>
+          <span style="display:inline-flex; align-items:center; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-accent-050); border:1px solid var(--rs-border-hairline); font-size: var(--rs-text-xs); font-weight: var(--rs-weight-medium); color: var(--rs-accent-700); text-transform:uppercase; letter-spacing:0.03em;">CT chest w/ contrast</span>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-accent-050, --rs-accent-700, --rs-radius-xs</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Vitals cell (range bar)</div>
+          <div style="font-size: var(--rs-text-sm); color: var(--rs-ink-900); font-variant-numeric: tabular-nums;">BP 152/96 <span style="font-size: var(--rs-text-2xs); color: var(--rs-severity-high);">above range</span></div>
+          <div style="position:relative; height:6px; background: var(--rs-surface-sunken); border-radius: var(--rs-radius-pill); margin-top: var(--rs-space-2);">
+            <div style="position:absolute; left:20%; width:45%; height:100%; background: var(--rs-ink-300); border-radius: var(--rs-radius-pill);"></div>
+            <div style="position:absolute; left:78%; width:3px; height:12px; top:-3px; background: var(--rs-severity-high); border-radius: 1px;"></div>
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-ink-300 (normal band), --rs-severity-high (marker)</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Citation chip</div>
+          <span style="display:inline-flex; align-items:center; gap:6px; padding: 4px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); font-size: var(--rs-text-xs); color: var(--rs-ink-700); max-width:100%;">
+            <span style="font-weight: var(--rs-weight-bold); color: var(--rs-accent-600);">[2]</span>
+            ACR Appropriateness Criteria — Ch. 4
+            <span style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500); font-variant-numeric: tabular-nums;">0.88</span>
+          </span>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-accent-600 (index), --rs-ink-500 (score), --rs-radius-xs</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Demo / Connected badge</div>
+          <div style="display:flex; gap: var(--rs-space-2);">
+            <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-pill); border:1px solid var(--rs-border-strong); font-size: var(--rs-text-2xs); color: var(--rs-ink-500);"><span style="width:6px;height:6px;border-radius:50%;background:var(--rs-ink-300);display:inline-block;"></span>DEMO</span>
+            <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-pill); border:1px solid var(--rs-border-strong); font-size: var(--rs-text-2xs); color: var(--rs-ink-500);"><span style="width:6px;height:6px;border-radius:50%;background:var(--rs-accent-500);display:inline-block;"></span>CONNECTED</span>
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-border-strong, --rs-ink-300/--rs-accent-500 dot, --rs-radius-pill</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Skeleton</div>
+          <div style="display:flex; flex-direction:column; gap: var(--rs-space-2);">
+            <div style="height:10px; width:70%; background: var(--rs-surface-sunken); border-radius: var(--rs-radius-xs);"></div>
+            <div style="height:10px; width:100%; background: var(--rs-surface-sunken); border-radius: var(--rs-radius-xs);"></div>
+            <div style="height:10px; width:45%; background: var(--rs-surface-sunken); border-radius: var(--rs-radius-xs);"></div>
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-surface-sunken, --rs-radius-xs, --rs-motion-base pulse</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Empty / error state</div>
+          <div style="display:flex; flex-direction:column; gap:2px;">
+            <div style="font-size: var(--rs-text-sm); color: var(--rs-ink-700); font-weight: var(--rs-weight-medium);">No matching evidence found</div>
+            <div style="font-size: var(--rs-text-xs); color: var(--rs-ink-500);">Broaden the query or check the source index.</div>
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-ink-700 / --rs-ink-500, no illustration</div>
+        </div>
+
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-5);">
+          <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Disclaimer bar (standing, not modal)</div>
+          <div style="display:flex; align-items:center; gap: var(--rs-space-2); padding: var(--rs-space-2) var(--rs-space-3); background: var(--rs-surface-sunken); border-top: 2px solid var(--rs-border-strong); font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">
+            <span style="width:14px; height:14px; border-radius:50%; border:1.5px solid var(--rs-ink-400); flex-shrink:0; display:flex; align-items:center; justify-content:center; font-size:9px; color: var(--rs-ink-400);">i</span>
+            Decision support only — verify against clinical judgment and source record.
+          </div>
+          <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-3); border-top:1px solid var(--rs-border-hairline); padding-top:var(--rs-space-2);">--rs-surface-sunken, --rs-border-strong top rule, pinned under every AI output</div>
+        </div>
+      </div>
+
+      <div style="margin-top: var(--rs-space-6);">
+        <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-3);">Verdict block — opens every Triage result and Analyzer output</div>
+        <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-left: 3px solid var(--rs-severity-high); border-radius: var(--rs-radius-md); padding: var(--rs-space-5); display:flex; align-items:flex-start; gap: var(--rs-space-6); flex-wrap:wrap;">
+          <div style="display:flex; flex-direction:column; gap: var(--rs-space-2); min-width:140px;">
+            <span style="display:inline-flex; align-items:center; gap:6px; font-size: var(--rs-text-lg); font-weight: var(--rs-weight-semibold); color: var(--rs-severity-high); letter-spacing:-0.01em;"><span style="width:12px; height:12px; background: var(--rs-severity-high); display:inline-block; transform: rotate(45deg);"></span>High</span>
+            <div style="font-size: var(--rs-text-xs); color: var(--rs-ink-500); font-variant-numeric: tabular-nums;">confidence 0.86</div>
+          </div>
+          <div style="display:flex; align-items:center; gap: var(--rs-space-2); padding: 4px 10px; border-radius: var(--rs-radius-pill); background: var(--rs-severity-high-bg); color: var(--rs-severity-high); font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); align-self:center;">Escalate to attending</div>
+          <div style="flex:1; min-width:220px;">
+            <div style="font-size: var(--rs-text-xs); font-weight: var(--rs-weight-semibold); color: var(--rs-ink-700); margin-bottom: var(--rs-space-1);">Red flags</div>
+            <div style="font-size: var(--rs-text-sm); color: var(--rs-ink-900);">Radiating chest pain · SpO2 91% · BP 152/96</div>
+          </div>
+        </div>
+        <div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-400); margin-top: var(--rs-space-2);">--rs-severity-high (border-left, chip), --rs-severity-high-bg, --rs-radius-md, --rs-space-5 padding</div>
+      </div>
+    </section>
+
+    <section id="dark" style="margin-bottom: var(--rs-space-8);">
+      <h2 style="font-size: var(--rs-text-xl); font-weight: var(--rs-weight-semibold); margin: 0 0 var(--rs-space-2);">Dark token variant</h2>
+      <p style="font-size: var(--rs-text-sm); color: var(--rs-ink-500); margin: 0 0 var(--rs-space-6); max-width: 680px;">Light mode is primary throughout the product. This is the token remap only, for future use.</p>
+
+      <div style="--rs-bg-shell: #0B1220; --rs-bg-canvas: #0B1220; --rs-surface: #111A2B; --rs-surface-raised: #141E33; --rs-surface-sunken: #0E1626; --rs-border-hairline: #1E2A40; --rs-border-strong: #2A3B58; --rs-ink-900: #E6EDF7; --rs-ink-700: #C4D0E0; --rs-ink-500: #9FB0C8; --rs-ink-400: #66768F; --rs-ink-300: #445369; --rs-accent-700: #14B8A6; --rs-accent-600: #2DD4BF; --rs-accent-500: #5EEAD4; --rs-accent-100: rgba(45,212,191,0.14); --rs-accent-050: rgba(45,212,191,0.08); --rs-accent-glow: rgba(45,212,191,0.18); --rs-data-2: #818CF8; --rs-severity-low: #34D399; --rs-severity-low-bg: rgba(52,211,153,0.14); --rs-severity-moderate: #FBBF24; --rs-severity-moderate-bg: rgba(251,191,36,0.14); --rs-severity-high: #FB923C; --rs-severity-high-bg: rgba(251,146,60,0.14); --rs-severity-critical: #F87171; --rs-severity-critical-bg: rgba(248,113,113,0.14); background: var(--rs-bg-shell); border-radius: var(--rs-radius-lg); padding: var(--rs-space-6); border:1px solid var(--rs-border-hairline);">
+        <div style="display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: var(--rs-space-4); margin-bottom: var(--rs-space-5);">
+          <div style="background: var(--rs-surface); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-4);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">surface</div></div>
+          <div style="background: var(--rs-surface-raised); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-4);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">surface-raised</div></div>
+          <div style="background: var(--rs-surface-sunken); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-md); padding: var(--rs-space-4);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-500);">surface-sunken</div></div>
+          <div style="background: var(--rs-surface); border:1px solid var(--rs-border-strong); border-radius: var(--rs-radius-md); padding: var(--rs-space-4);"><div style="font-size: var(--rs-text-2xs); color: var(--rs-ink-900);">ink-900 text</div></div>
+        </div>
+        <div style="display:flex; gap: var(--rs-space-2); flex-wrap:wrap;">
+          <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-low-bg); font-size: var(--rs-text-xs); color: var(--rs-severity-low);"><span style="width:8px;height:8px;border-radius:50%;background:var(--rs-severity-low);display:inline-block;"></span>Low</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-moderate-bg); font-size: var(--rs-text-xs); color: var(--rs-severity-moderate);"><span style="width:8px;height:8px;background:var(--rs-severity-moderate);display:inline-block;clip-path: polygon(50% 0%, 100% 100%, 0% 100%);"></span>Moderate</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-high-bg); font-size: var(--rs-text-xs); color: var(--rs-severity-high);"><span style="width:8px;height:8px;background:var(--rs-severity-high);display:inline-block;transform:rotate(45deg);"></span>High</span>
+          <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-severity-critical-bg); font-size: var(--rs-text-xs); color: var(--rs-severity-critical);"><span style="width:8px;height:8px;background:var(--rs-severity-critical);display:inline-block;clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);"></span>Critical</span>
+          <span style="display:inline-flex; align-items:center; padding: 3px 8px; border-radius: var(--rs-radius-xs); background: var(--rs-accent-100); font-size: var(--rs-text-xs); color: var(--rs-accent-600); font-weight: var(--rs-weight-medium);">Primary action</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+</x-dc>
+</body>
+</html>

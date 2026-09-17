@@ -13,7 +13,7 @@ BACKEND_DIR = Path(__file__).resolve().parent
 
 
 class Settings(BaseSettings):
-  app_name: str = "ReportIQ Backend"
+  app_name: str = "RediSense Backend"
   environment: Literal["development", "test", "staging", "production"] = (
     "development"
   )
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
   api_port: int = 8000
 
   postgres_url: str = Field(
-    default="postgresql+psycopg2://reportiq:reportiq@localhost:5432/reportiq",
+    default="postgresql+psycopg2://redisense:redisense@localhost:5432/redisense",
     validation_alias=AliasChoices("POSTGRES_URL", "DATABASE_URL"),
   )
 

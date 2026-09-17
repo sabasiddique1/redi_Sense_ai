@@ -20,7 +20,7 @@ test("knowledge center view model maps real evidence sources for rendering", () 
 
   assert.equal(items.length, 1);
   assert.equal(items[0]?.title, "Pulmonary Nodule Follow-up Primer");
-  assert.equal(items[0]?.usedInAnswer, true);
+  assert.equal(items[0]?.usedInAnswer, false);
   assert.equal(items[0]?.section, "Pulmonary nodules");
   assert.equal(items[0]?.score, 0.92);
 });

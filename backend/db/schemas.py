@@ -480,3 +480,104 @@ class PublicConfigResponse(BaseModel):
   demo_mode_enabled: bool
   openai_chat_model: str
   openai_embedding_model: str
+
+
+RiskLevel = Literal["Low", "Moderate", "High", "Critical"]
+
+
+class DashboardDelta(BaseModel):
+  direction: Literal["up", "down", "flat"]
+  label: str
+
+
+class DashboardSecondary(BaseModel):
+  value: str
+  label: str
+  tone: RiskLevel | None = None
+
+
+class DashboardMetric(BaseModel):
+  id: str
+  label: str
+  value: str | None = None
+  unit: str | None = None
+  trend: Literal["up", "down", "neutral"] = "neutral"
+  trend_label: str
+  delta: DashboardDelta | None = None
+  series: list[int] | None = None
+  footnote: str | None = None
+  pill: str | None = None
+  secondary: DashboardSecondary | None = None
+
+
+class DashboardReportRow(BaseModel):
+  id: str
+  patient_name: str
+  patient_id: str
+  mrn: str | None = None
+  modality: str
+  summary: str
+  risk: RiskLevel
+  confidence: int | None = Field(default=None, ge=0, le=100)
+  received_at: datetime | None = None
+  minutes_in_queue: int | None = None
+
+
+class DashboardAlert(BaseModel):
+  id: str
+  label: str
+  patient_name: str
+  detail: str
+  severity: Literal["High", "Critical"]
+  elapsed_minutes: int | None = None
+  sla_minutes: int = 30
+
+
+class DashboardInsight(BaseModel):
+  id: str
+  title: str
+  summary: str
+  confidence: int = Field(ge=0, le=100)
+  record_count: int | None = Field(default=None, ge=0)
+
+
+class DashboardRiskBucket(BaseModel):
+  label: RiskLevel
+  value: int = Field(ge=0)
+
+
+class DashboardLabelledValue(BaseModel):
+  label: str
+  value: int = Field(ge=0)
+
+
+class DashboardActivityItem(BaseModel):
+  id: str
+  timestamp: datetime | None = None
+  label: str
+  detail: str
+  event_type: str
+  patient_id: int | None = None
+  patient_name: str | None = None
+
+
+class DashboardSummaryResponse(BaseModel):
+  generated_at: datetime
+  risk_window_days: int
+  trend_days: int = 7
+  metrics: list[DashboardMetric] = Field(default_factory=list)
+  reports_by_risk: list[DashboardRiskBucket] = Field(default_factory=list)
+  reports_by_risk_caption: str | None = None
+  modality_mix: list[DashboardLabelledValue] = Field(default_factory=list)
+  modality_total: int = 0
+  hourly: list[DashboardLabelledValue] = Field(default_factory=list)
+  hourly_target: int | None = None
+  hourly_caption: str | None = None
+  reports_queue: list[DashboardReportRow] = Field(default_factory=list)
+  reports_total: int = 0
+  urgent_alerts: list[DashboardAlert] = Field(default_factory=list)
+  ai_insight: DashboardInsight
+  risk_distribution: list[DashboardRiskBucket] = Field(default_factory=list)
+  recent_activity: list[DashboardActivityItem] = Field(default_factory=list)
+  disclaimer: str = CLINICAL_DISCLAIMER
+  mode: Literal["real"] = "real"

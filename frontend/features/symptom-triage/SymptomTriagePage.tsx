@@ -1,13 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, ArrowRight, Stethoscope } from "lucide-react";
+import { Stethoscope } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppState } from "@/hooks/useAppState";
 import { apiClient, ApiError } from "@/lib/api";
@@ -30,6 +27,13 @@ import type {
 } from "@/lib/contracts";
 import { mockTriageResult } from "../mock-data/symptom-triage";
 import { PageHeader } from "../shared/PageHeader";
+import { EmptyState, SkeletonCard } from "../shared/PageStates";
+import { DisclaimerBar } from "@/components/ui/disclaimer-bar";
+import { HBarList } from "@/components/charts/HBarList";
+import { assessVitals, type VitalReading } from "./vitals";
+import { mockTriageContributors } from "../mock-data/symptom-triage";
+import { EvidenceChips, VerdictBlock } from "../shared/VerdictBlock";
+import { isEscalationLevel, normalizeRiskLevel, riskClasses } from "../shared/risk";
 
 
 type TriageResult = {
@@ -354,27 +358,6 @@ function mapTriageToView(payload: TriageAnalyzeResponse): TriageResult {
   };
 }
 
-function modeLabel(mode: ResultMode): string {
-  if (mode === "real") return "Connected";
-  if (mode === "fallback") return "Connected fallback";
-  if (mode === "demo") return "Demo";
-  return "Error";
-}
-
-function modeTone(mode: ResultMode): "success" | "warning" | "outline" | "danger" {
-  if (mode === "real") return "success";
-  if (mode === "fallback") return "warning";
-  if (mode === "demo") return "outline";
-  return "danger";
-}
-
-function careTone(careLevel: TriageCareLevel | null): "success" | "warning" | "outline" | "danger" {
-  if (careLevel === "Emergency") return "danger";
-  if (careLevel === "Urgent") return "warning";
-  if (careLevel === "Routine") return "outline";
-  return "success";
-}
-
 function SectionLabel({
   title,
   description,
@@ -384,9 +367,9 @@ function SectionLabel({
 }) {
   return (
     <div className="space-y-0.5">
-      <p className="text-[11px] font-medium text-[#344054]">{title}</p>
+      <p className="text-[11px] font-medium text-text-body">{title}</p>
       {description ? (
-        <p className="text-[11px] text-[#667085]">{description}</p>
+        <p className="text-[11px] text-text-secondary">{description}</p>
       ) : null}
     </div>
   );
@@ -411,7 +394,7 @@ function ToggleGroup<T extends string>({
             type="button"
             size="sm"
             variant={selected ? "primary" : "outline"}
-            className={selected ? "" : "bg-white"}
+            className={selected ? "" : "bg-surface"}
             onClick={() => onToggle(option.value)}
           >
             {option.label}
@@ -441,7 +424,7 @@ function SingleSelectGroup<T extends string>({
             type="button"
             size="sm"
             variant={selected ? "primary" : "outline"}
-            className={selected ? "" : "bg-white"}
+            className={selected ? "" : "bg-surface"}
             onClick={() => onSelect(option.value)}
           >
             {option.label}
@@ -465,7 +448,6 @@ export function SymptomTriagePage() {
     triageTimelineMessage,
     setTriageTimelineMessage,
   } = useAppState();
-  const [activeTab, setActiveTab] = useState("core");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const result = triageResult ? mapTriageToView(triageResult) : null;
@@ -566,6 +548,13 @@ export function SymptomTriagePage() {
     }
   };
 
+  const vitals = assessVitals(triageDraft);
+  const severityValue = Number(triageDraft.severity) || 0;
+  const resultLevel = result ? normalizeRiskLevel(result.riskLevel) : null;
+  // Demo-only: the triage engine does not expose contributor weights.
+  // TODO(backend): TriageAnalyzeResponse.contributors [{label, weight}] from the rule engine.
+  const contributors = result?.renderMode === "demo" ? mockTriageContributors : null;
+
   return (
     <div className="space-y-5">
       <PageHeader
@@ -573,435 +562,300 @@ export function SymptomTriagePage() {
         subtitle="Enter structured symptom details for safer triage, explicit red-flag detection, and clearer recommendations."
       />
 
-      <div className="grid gap-5 lg:grid-cols-12">
-        <div className="lg:col-span-5">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <Stethoscope className="h-4 w-4 text-[#4C8DFF]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
-                  Symptom input
-                </CardTitle>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <section className="card-surface p-5" aria-labelledby="triage-intake-title">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 id="triage-intake-title" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+                <Stethoscope className="h-4 w-4 text-accent-600" aria-hidden="true" />
+                Intake
+              </h2>
+              <p className="mt-0.5 text-2xs text-ink-500">Structured facts drive triage. AI is used only to explain the grounded result.</p>
+            </div>
+            <p className="text-right text-2xs text-ink-500">
+              {selectedPatient ? (
+                <>
+                  Linked patient
+                  <br />
+                  <span className="font-semibold text-ink-900">{selectedPatient.name}</span>
+                </>
+              ) : (
+                "No connected patient context"
+              )}
+            </p>
+          </div>
+
+          <div className="mt-5 space-y-5">
+            <div className="space-y-2">
+              <SectionLabel title="Main symptom" description="Use the primary complaint, for example sore throat, low back pain, chest tightness, vomiting, or dizziness." />
+              <Input value={triageDraft.mainSymptom} onChange={(event) => updateDraft({ mainSymptom: event.target.value })} placeholder="e.g., sharp chest pain, left side" />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-[1fr_1fr_1.4fr]">
+              <div className="space-y-2">
+                <SectionLabel title="Age" />
+                <Input type="number" min="0" max="120" value={triageDraft.age} onChange={(event) => updateDraft({ age: event.target.value })} placeholder="Optional" />
               </div>
-              <p className="text-[11px] text-[#667085]">
-                Structured facts drive triage. AI is used only to explain the grounded result.
-              </p>
-              <p className="text-[11px] text-[#667085]">
-                {selectedPatient
-                  ? `Linked patient: ${selectedPatient.name}`
-                  : "Running without connected patient context"}
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4 pt-0">
-              <Tabs value={activeTab} onChange={setActiveTab}>
-                <TabsList className="w-full justify-between">
-                  <TabsTrigger value="core">Core</TabsTrigger>
-                  <TabsTrigger value="context">Context</TabsTrigger>
-                  <TabsTrigger value="vitals">Vitals</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="core" activeValue={activeTab} className="space-y-4">
-                  <div className="space-y-2">
-                    <SectionLabel
-                      title="Main symptom"
-                      description="Use the primary complaint, for example sore throat, low back pain, chest tightness, vomiting, or dizziness."
-                    />
-                    <Input
-                      value={triageDraft.mainSymptom}
-                      onChange={(event) => updateDraft({ mainSymptom: event.target.value })}
-                      placeholder="e.g., chronic low back pain"
-                    />
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-3">
-                    <div className="space-y-2">
-                      <SectionLabel title="Age" />
-                      <Input
-                        type="number"
-                        min="0"
-                        max="120"
-                        value={triageDraft.age}
-                        onChange={(event) => updateDraft({ age: event.target.value })}
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div className="space-y-2 sm:col-span-2">
-                      <SectionLabel title="Gender / sex" />
-                      <SingleSelectGroup
-                        options={SEX_OPTIONS}
-                        selectedValue={triageDraft.sex}
-                        onSelect={(value) => updateDraft({ sex: triageDraft.sex === value ? "" : value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-[120px_1fr]">
-                    <div className="space-y-2">
-                      <SectionLabel title="Duration" description="Use minutes for sudden symptoms and months or years for long-standing symptoms." />
-                      <Input
-                        type="number"
-                        min="0"
-                        value={triageDraft.durationValue}
-                        onChange={(event) => updateDraft({ durationValue: event.target.value })}
-                        placeholder="Value"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="Duration unit" />
-                      <SingleSelectGroup
-                        options={DURATION_UNIT_OPTIONS}
-                        selectedValue={triageDraft.durationUnit}
-                        onSelect={(value) => updateDraft({ durationUnit: value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <SectionLabel title="Severity (0-10)" />
-                      <Input
-                        type="number"
-                        min="0"
-                        max="10"
-                        value={triageDraft.severity}
-                        onChange={(event) => updateDraft({ severity: event.target.value })}
-                        placeholder="Optional"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="Location detail" />
-                      <Input
-                        value={triageDraft.locationDetail}
-                        onChange={(event) => updateDraft({ locationDetail: event.target.value })}
-                        placeholder="e.g., lower back, right lower abdomen, left eye, throat"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel title="Location" />
-                    <SingleSelectGroup
-                      options={LOCATION_OPTIONS}
-                      selectedValue={triageDraft.location}
-                      onSelect={(value) => updateDraft({ location: triageDraft.location === value ? "" : value })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel
-                      title="Radiation"
-                      description="Use this only if the symptom spreads to another area."
-                    />
-                    <ToggleGroup
-                      options={RADIATION_OPTIONS}
-                      selectedValues={triageDraft.radiation}
-                      onToggle={toggleRadiation}
-                    />
-                    {triageDraft.radiation.includes("other") ? (
-                      <Input
-                        value={triageDraft.radiationDetail}
-                        onChange={(event) => updateDraft({ radiationDetail: event.target.value })}
-                        placeholder="Describe where it radiates"
-                      />
-                    ) : null}
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="context" activeValue={activeTab} className="space-y-4">
-                  <div className="space-y-2">
-                    <SectionLabel title="Associated symptoms" description="Keep these general. Add only symptoms that are actually present." />
-                    <ToggleGroup
-                      options={ASSOCIATED_SYMPTOM_OPTIONS}
-                      selectedValues={triageDraft.associatedSymptoms}
-                      onToggle={(value) => toggleMultiValue("associatedSymptoms", value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel title="What makes it worse" />
-                    <ToggleGroup
-                      options={AGGRAVATING_FACTOR_OPTIONS}
-                      selectedValues={triageDraft.aggravatingFactors}
-                      onToggle={(value) => toggleMultiValue("aggravatingFactors", value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel title="What makes it better" />
-                    <ToggleGroup
-                      options={RELIEVING_FACTOR_OPTIONS}
-                      selectedValues={triageDraft.relievingFactors}
-                      onToggle={(value) => toggleMultiValue("relievingFactors", value)}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel
-                      title="Explicit red flags"
-                      description="Use only true warning signs. Symptom location such as back pain should not be entered here."
-                    />
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={triageDraft.noRedFlags ? "primary" : "outline"}
-                      className={triageDraft.noRedFlags ? "" : "bg-white"}
-                      onClick={() =>
-                        updateDraft({
-                          noRedFlags: !triageDraft.noRedFlags,
-                          redFlags: [],
-                        })
-                      }
-                    >
-                      None reported
-                    </Button>
-                    <ToggleGroup
-                      options={RED_FLAG_OPTIONS}
-                      selectedValues={triageDraft.redFlags}
-                      onToggle={toggleRedFlag}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel title="Relevant history" description="Include broad medical context that meaningfully changes risk." />
-                    <ToggleGroup
-                      options={HISTORY_OPTIONS}
-                      selectedValues={triageDraft.relevantHistory}
-                      onToggle={(value) => toggleMultiValue("relevantHistory", value)}
-                    />
-                    <Input
-                      value={triageDraft.historyDetail}
-                      onChange={(event) => updateDraft({ historyDetail: event.target.value })}
-                      placeholder="Optional extra history or medication detail"
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <SectionLabel title="Additional details" />
-                    <Textarea
-                      rows={4}
-                      value={triageDraft.additionalDetails}
-                      onChange={(event) => updateDraft({ additionalDetails: event.target.value })}
-                      placeholder="Optional free text. Use this only for extra details that are not covered above."
-                      className="rounded-[14px] border-[#E6ECF5]"
-                    />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="vitals" activeValue={activeTab} className="space-y-4">
-                  <p className="text-[11px] text-[#667085]">
-                    Optional vital signs. Abnormal vitals can increase urgency even when no explicit red flags are checked.
-                  </p>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <SectionLabel title="Systolic BP" />
-                      <Input
-                        type="number"
-                        value={triageDraft.systolicBp}
-                        onChange={(event) => updateDraft({ systolicBp: event.target.value })}
-                        placeholder="e.g., 118"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="Diastolic BP" />
-                      <Input
-                        type="number"
-                        value={triageDraft.diastolicBp}
-                        onChange={(event) => updateDraft({ diastolicBp: event.target.value })}
-                        placeholder="e.g., 72"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="Heart rate" />
-                      <Input
-                        type="number"
-                        value={triageDraft.heartRate}
-                        onChange={(event) => updateDraft({ heartRate: event.target.value })}
-                        placeholder="e.g., 84"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="Temperature C" />
-                      <Input
-                        type="number"
-                        step="0.1"
-                        value={triageDraft.temperatureC}
-                        onChange={(event) => updateDraft({ temperatureC: event.target.value })}
-                        placeholder="e.g., 37.0"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <SectionLabel title="SpO2 %" />
-                      <Input
-                        type="number"
-                        value={triageDraft.spo2}
-                        onChange={(event) => updateDraft({ spo2: event.target.value })}
-                        placeholder="e.g., 98"
-                      />
-                    </div>
-                  </div>
-                </TabsContent>
-              </Tabs>
-
-              <div className="rounded-[14px] bg-[#F8FAFD] p-3">
-                <p className="text-[11px] text-[#667085]">
-                  The urgency level is determined by rule-based logic first. AI is allowed to explain the result, but it cannot invent red flags or override the final urgency.
-                </p>
+              <div className="space-y-2">
+                <SectionLabel title="Sex" />
+                <SingleSelectGroup options={SEX_OPTIONS} selectedValue={triageDraft.sex} onSelect={(value) => updateDraft({ sex: triageDraft.sex === value ? "" : value })} />
               </div>
+              <div className="space-y-2">
+                <SectionLabel title="Duration" />
+                <div className="flex gap-2">
+                  <Input type="number" min="0" value={triageDraft.durationValue} onChange={(event) => updateDraft({ durationValue: event.target.value })} placeholder="45" className="w-24" />
+                  <select
+                    aria-label="Duration unit"
+                    value={triageDraft.durationUnit}
+                    onChange={(event) => updateDraft({ durationUnit: event.target.value as TriageDurationUnit })}
+                    className="h-10 flex-1 rounded-md border border-border-hairline bg-surface px-2 text-sm text-ink-900"
+                  >
+                    {DURATION_UNIT_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
 
-              <Button
-                onClick={handleAnalyze}
-                className="w-full gap-2"
-                disabled={loading}
-              >
-                <Stethoscope className="h-4 w-4" />
-                {loading ? "Analyzing…" : "Analyze triage"}
-              </Button>
-              {triageTimelineMessage ? (
-                <p className="text-[11px] text-[#1D4ED8]">{triageTimelineMessage}</p>
-              ) : null}
-            </CardContent>
-          </Card>
-        </div>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <SectionLabel title="Severity" />
+                <span className="font-mono text-xs text-ink-700 rs-tabular">{triageDraft.severity ? `${severityValue} / 10` : "not rated"}</span>
+              </div>
+              <input
+                type="range"
+                min={0}
+                max={10}
+                step={1}
+                value={severityValue}
+                aria-label="Severity, 0 none to 10 worst ever"
+                aria-valuetext={triageDraft.severity ? `${severityValue} of 10` : "not rated"}
+                onChange={(event) => updateDraft({ severity: event.target.value })}
+                className="w-full accent-accent-600"
+              />
+              <div className="flex justify-between text-2xs text-ink-400" aria-hidden="true">
+                <span>0 none</span>
+                <span>10 worst ever</span>
+              </div>
+            </div>
 
-        <div className="space-y-4 lg:col-span-7">
-          {result ? (
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <SectionLabel title="Location" />
+                <SingleSelectGroup options={LOCATION_OPTIONS} selectedValue={triageDraft.location} onSelect={(value) => updateDraft({ location: triageDraft.location === value ? "" : value })} />
+                <Input value={triageDraft.locationDetail} onChange={(event) => updateDraft({ locationDetail: event.target.value })} placeholder="Detail, e.g. substernal, left chest" />
+              </div>
+              <div className="space-y-2">
+                <SectionLabel title="Radiation" description="Only if the symptom spreads to another area." />
+                <ToggleGroup options={RADIATION_OPTIONS} selectedValues={triageDraft.radiation} onToggle={toggleRadiation} />
+                {triageDraft.radiation.includes("other") ? (
+                  <Input value={triageDraft.radiationDetail} onChange={(event) => updateDraft({ radiationDetail: event.target.value })} placeholder="Describe where it radiates" />
+                ) : null}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <SectionLabel title="Associated symptoms" description="Add only symptoms that are actually present." />
+              <ToggleGroup options={ASSOCIATED_SYMPTOM_OPTIONS} selectedValues={triageDraft.associatedSymptoms} onToggle={(value) => toggleMultiValue("associatedSymptoms", value)} />
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-2">
+                <SectionLabel title="Aggravating factors" />
+                <ToggleGroup options={AGGRAVATING_FACTOR_OPTIONS} selectedValues={triageDraft.aggravatingFactors} onToggle={(value) => toggleMultiValue("aggravatingFactors", value)} />
+              </div>
+              <div className="space-y-2">
+                <SectionLabel title="Relieving factors" />
+                <ToggleGroup options={RELIEVING_FACTOR_OPTIONS} selectedValues={triageDraft.relievingFactors} onToggle={(value) => toggleMultiValue("relievingFactors", value)} />
+              </div>
+            </div>
+
+            <fieldset className="space-y-2 rounded-md border border-severity-critical/30 bg-severity-critical-bg p-3">
+              <legend className="px-1 text-2xs font-semibold uppercase tracking-[0.05em] text-severity-critical">Explicit red flags</legend>
+              <p className="text-2xs text-ink-500">Use only true warning signs. Symptom location such as back pain should not be entered here.</p>
+              <div className="grid gap-1.5 sm:grid-cols-2">
+                {RED_FLAG_OPTIONS.map((option) => {
+                  const checked = triageDraft.redFlags.includes(option.value);
+                  return (
+                    <label key={option.value} className="flex cursor-pointer items-center gap-2 rounded-sm px-1 py-1 text-xs text-ink-900 hover:bg-surface/60">
+                      <input type="checkbox" checked={checked} onChange={() => toggleRedFlag(option.value)} className="h-3.5 w-3.5 accent-severity-critical" />
+                      {option.label}
+                    </label>
+                  );
+                })}
+              </div>
+              <label className="flex cursor-pointer items-center gap-2 border-t border-severity-critical/20 pt-2 text-xs text-ink-700">
+                <input type="checkbox" checked={triageDraft.noRedFlags} onChange={() => updateDraft({ noRedFlags: !triageDraft.noRedFlags, redFlags: [] })} className="h-3.5 w-3.5 accent-accent-600" />
+                None reported
+              </label>
+            </fieldset>
+
+            <div className="space-y-2">
+              <SectionLabel title="Relevant history" description="Include broad medical context that meaningfully changes risk." />
+              <ToggleGroup options={HISTORY_OPTIONS} selectedValues={triageDraft.relevantHistory} onToggle={(value) => toggleMultiValue("relevantHistory", value)} />
+              <Input value={triageDraft.historyDetail} onChange={(event) => updateDraft({ historyDetail: event.target.value })} placeholder="e.g. Hypertension, hyperlipidemia. Former smoker (quit 2019)." />
+            </div>
+
+            <div className="space-y-2">
+              <SectionLabel title="Additional details" />
+              <Textarea rows={3} value={triageDraft.additionalDetails} onChange={(event) => updateDraft({ additionalDetails: event.target.value })} placeholder="Optional — free text" />
+            </div>
+
+            <fieldset className="rounded-md border border-border-hairline bg-surface-sunken p-3">
+              <legend className="px-1 text-2xs font-semibold uppercase tracking-[0.05em] text-ink-500">Vitals</legend>
+              <p className="text-2xs text-ink-500">Optional. Abnormal vitals can increase urgency even when no explicit red flags are checked.</p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="space-y-1">
+                  <SectionLabel title="BP (sys/dia)" />
+                  <div className="flex items-center gap-1">
+                    <Input type="number" aria-label="Systolic BP" value={triageDraft.systolicBp} onChange={(event) => updateDraft({ systolicBp: event.target.value })} placeholder="152" className="font-mono" />
+                    <span className="text-ink-400">/</span>
+                    <Input type="number" aria-label="Diastolic BP" value={triageDraft.diastolicBp} onChange={(event) => updateDraft({ diastolicBp: event.target.value })} placeholder="96" className="font-mono" />
+                  </div>
+                  <VitalNote reading={vitals[0]} />
+                </div>
+                <div className="space-y-1">
+                  <SectionLabel title="Heart rate" />
+                  <Input type="number" aria-label="Heart rate" value={triageDraft.heartRate} onChange={(event) => updateDraft({ heartRate: event.target.value })} placeholder="104" className="font-mono" />
+                  <VitalNote reading={vitals[1]} />
+                </div>
+                <div className="space-y-1">
+                  <SectionLabel title="Temp (°C)" />
+                  <Input type="number" step="0.1" aria-label="Temperature in Celsius" value={triageDraft.temperatureC} onChange={(event) => updateDraft({ temperatureC: event.target.value })} placeholder="37.1" className="font-mono" />
+                  <VitalNote reading={vitals[2]} />
+                </div>
+                <div className="space-y-1">
+                  <SectionLabel title="SpO2 (%)" />
+                  <Input type="number" aria-label="Oxygen saturation" value={triageDraft.spo2} onChange={(event) => updateDraft({ spo2: event.target.value })} placeholder="94" className="font-mono" />
+                  <VitalNote reading={vitals[3]} />
+                </div>
+              </div>
+            </fieldset>
+
+            <p className="text-2xs text-ink-500">
+              The urgency level is determined by rule-based logic first. AI is allowed to explain the result, but it cannot invent red flags or override the final urgency.
+            </p>
+
+            <Button onClick={handleAnalyze} className="w-full gap-2" disabled={loading} loading={loading}>
+              <Stethoscope className="h-4 w-4" aria-hidden="true" />
+              {loading ? "Running triage…" : "Run triage"}
+            </Button>
+            {triageTimelineMessage ? <p className="text-2xs text-accent-700">{triageTimelineMessage}</p> : null}
+            {error ? <p className="text-2xs text-severity-critical" role="alert">{error}</p> : null}
+          </div>
+        </section>
+
+        <div className="space-y-4">
+          {loading && !result ? (
+            <div className="space-y-4" aria-busy="true">
+              <SkeletonCard lines={2} />
+              <SkeletonCard lines={4} />
+              <SkeletonCard lines={3} />
+            </div>
+          ) : result ? (
             <>
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Stethoscope className="h-4 w-4 text-[#4C8DFF]" />
-                    <CardTitle className="text-sm font-semibold text-[#101828]">
-                      Triage result
-                    </CardTitle>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge tone={modeTone(result.renderMode)}>
-                      {modeLabel(result.renderMode)}
-                    </Badge>
-                    {result.careLevel ? (
-                      <Badge tone={careTone(result.careLevel)}>
-                        {result.careLevel}
-                      </Badge>
-                    ) : null}
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-3 pt-0">
-                  <p className="text-xs leading-relaxed text-[#101828]">
-                    {result.summary}
-                  </p>
-                  {result.aiMode ? (
-                    <p className="text-[11px] text-[#667085]">
-                      AI processing: {result.aiMode}
-                    </p>
-                  ) : null}
-                  {result.fallbackReason ? (
-                    <p className="text-[11px] text-[#667085]">
-                      Fallback reason: {result.fallbackReason}
-                    </p>
-                  ) : null}
-                  {result.invalidInput ? (
-                    <div className="rounded-[14px] border border-[#FEDF89] bg-[#FFFAEB] px-3 py-3 text-xs text-[#92400E]">
-                      {result.validationMessage}
-                    </div>
-                  ) : null}
-                  {!result.invalidInput && result.differential.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {result.differential.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full bg-[#EAF2FF] px-2.5 py-0.5 text-[11px] font-medium text-[#1D4ED8]"
-                        >
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </CardContent>
-              </Card>
+              <VerdictBlock
+                severityLabel="Risk level"
+                severity={resultLevel}
+                secondary={result.careLevel ? `Care level: ${result.careLevel}` : null}
+                confidence={result.renderMode === "demo" ? 86 : null}
+                confidenceNote={result.renderMode === "demo" ? "Demo score for the sample scenario." : "Urgency is rule-based and is not scored as a probability."}
+                escalate={!result.invalidInput && (isEscalationLevel(resultLevel) || result.redFlags.length > 0)}
+                escalationText={
+                  result.invalidInput
+                    ? "Input needs correction before a verdict can be issued."
+                    : isEscalationLevel(resultLevel)
+                      ? "Escalate to attending"
+                      : "No explicit red flags were reported."
+                }
+                redFlags={result.invalidInput ? [] : result.redFlags}
+                basis={result.aiMode ? `Rule-based urgency · AI explanation (${result.aiMode})` : "Rule-based urgency"}
+                mode={result.renderMode}
+              />
 
-              {!result.invalidInput && result.reasoning.length > 0 ? (
-                <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-[#4C8DFF]" />
-                      <CardTitle className="text-sm font-semibold text-[#101828]">
-                        Why this result
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 pt-0">
-                    {result.reasoning.map((item) => (
-                      <div
-                        key={item}
-                        className="rounded-[14px] bg-[#F8FAFD] px-3 py-2 text-xs text-[#344054]"
-                      >
-                        {item}
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
-              ) : null}
-
-              {!result.invalidInput && result.redFlags.length > 0 ? (
-                <Card className="rounded-[20px] border border-[#FEE2E2] bg-[#FEF2F2] shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="h-4 w-4 text-[#B91C1C]" />
-                      <CardTitle className="text-sm font-semibold text-[#B91C1C]">
-                        Explicit red flags detected
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="space-y-2 pt-0">
-                    {result.redFlags.map((flag) => (
-                      <div
-                        key={flag}
-                        className="flex items-center gap-2 rounded-[14px] bg-white/80 px-3 py-2"
-                      >
-                        <span className="text-red-500">⚠</span>
-                        <p className="text-xs text-[#7F1D1D]">{flag}</p>
-                      </div>
-                    ))}
-                  </CardContent>
-                </Card>
+              {result.invalidInput ? (
+                <div className="rounded-md border border-severity-moderate/30 bg-severity-moderate-bg px-3 py-3 text-xs text-severity-moderate">{result.validationMessage}</div>
               ) : null}
 
               {!result.invalidInput ? (
-                <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-center gap-2">
-                      <ArrowRight className="h-4 w-4 text-[#4C8DFF]" />
-                      <CardTitle className="text-sm font-semibold text-[#101828]">
-                        Recommended action
-                      </CardTitle>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="pt-0">
-                    <div className="rounded-[14px] bg-[#EAF2FF] p-4">
-                      <p className="text-sm font-semibold text-[#1D4ED8]">
-                        {result.recommendedAction}
+                <section className="card-surface p-5" aria-labelledby="triage-contributors-title">
+                  <h2 id="triage-contributors-title" className="text-sm font-semibold text-ink-900">Risk contributors</h2>
+                  <p className="mt-0.5 text-2xs text-ink-500">Relative weight of inputs that drove this score</p>
+                  <div className="mt-3">
+                    {contributors ? (
+                      <HBarList items={contributors} emphasis="High" title="Risk contributors" />
+                    ) : (
+                      <p className="rounded-md border border-dashed border-border-strong px-3 py-3 text-2xs text-ink-500">
+                        Not available — needs contributor weights from the triage engine. Rule-based red flags are listed in the verdict above.
                       </p>
-                      <p className="mt-1 text-xs text-[#667085]">
-                        {result.actionDetail}
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
+                    )}
+                  </div>
+                </section>
               ) : null}
-              <p className="text-[11px] text-[#667085]">{result.disclaimer}</p>
+
+              {!result.invalidInput ? (
+                <section className="card-surface p-5" aria-labelledby="triage-recs-title">
+                  <h2 id="triage-recs-title" className="text-sm font-semibold text-ink-900">Recommendations</h2>
+                  <div className={`mt-3 rounded-md border-l-4 p-4 ${riskClasses(resultLevel).rail} ${riskClasses(resultLevel).soft}`}>
+                    <p className="text-sm font-semibold text-ink-900">{result.recommendedAction}</p>
+                    <p className="mt-1 text-xs text-ink-700">{result.actionDetail}</p>
+                  </div>
+                  {result.reasoning.length > 0 ? (
+                    <ol className="mt-3 list-decimal space-y-1.5 pl-5 text-xs text-ink-700">
+                      {result.reasoning.map((item) => (
+                        <li key={item}>{item}</li>
+                      ))}
+                    </ol>
+                  ) : null}
+                </section>
+              ) : null}
+
+              <section className="card-surface p-5" aria-labelledby="triage-reasoning-title">
+                <h2 id="triage-reasoning-title" className="text-sm font-semibold text-ink-900">Reasoning</h2>
+                <p className="mt-2 text-xs leading-relaxed text-ink-700">{result.summary}</p>
+                {result.fallbackReason ? <p className="mt-2 text-2xs text-ink-500">Fallback reason: {result.fallbackReason}</p> : null}
+                {!result.invalidInput && result.differential.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {result.differential.map((item) => (
+                      <span key={item} className="rounded-pill bg-accent-050 px-2.5 py-0.5 text-2xs font-medium text-accent-700">{item}</span>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+
+              {!result.invalidInput && result.differential.length > 0 ? (
+                <section className="card-surface p-5" aria-labelledby="triage-citations-title">
+                  <h2 id="triage-citations-title" className="text-sm font-semibold text-ink-900">Citations</h2>
+                  <p className="mt-0.5 text-2xs text-ink-500">Evidence lookups for the differential in the Knowledge Center</p>
+                  <div className="mt-3">
+                    <EvidenceChips title="" items={result.differential.map((item) => ({ id: item, label: item, query: item }))} />
+                  </div>
+                </section>
+              ) : null}
+
+              <DisclaimerBar />
             </>
           ) : (
-            <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-12 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-              <p className="text-sm text-[#98A2B3]">
-                Enter structured symptom details and click &quot;Analyze triage&quot; to see results.
-              </p>
-            </Card>
+            <EmptyState icon={Stethoscope} title="No triage run yet" description="Enter structured symptom details and click “Run triage” to see the verdict, red flags and recommendations." />
           )}
-          {error ? (
-            <p className="text-[11px] text-[#B42318]">{error}</p>
-          ) : null}
         </div>
       </div>
     </div>
+  );
+}
+
+function VitalNote({ reading }: { reading: VitalReading }) {
+  if (!reading.value) return <p className="text-2xs text-ink-400">Not entered</p>;
+  const tone =
+    reading.status === "above" || reading.status === "below" ? "text-severity-high" : reading.status === "low-normal" ? "text-severity-moderate" : "text-severity-low";
+  return (
+    <p className="text-2xs text-ink-500">
+      <span className="font-mono text-ink-900 rs-tabular">{reading.value}</span>
+      {reading.unit ? ` ${reading.unit}` : ""}
+      {reading.note ? <span className={`ml-1 font-semibold ${tone}`}>· {reading.note}</span> : null}
+    </p>
   );
 }

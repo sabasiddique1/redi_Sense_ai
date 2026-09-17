@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { withDemoFallback } from "../lib/api.ts";
+import { apiClient, withDemoFallback } from "../lib/api.ts";
+import { buildDemoDashboardSummary } from "../features/mock-data/dashboard.ts";
 
 
 test("connected mode does not silently fall back to demo data on failure", async () => {
@@ -63,4 +64,29 @@ test("structured API error modes remain truthful in connected mode", async () =>
   assert.equal(result.mode, "error");
   assert.equal(result.source, "api");
   assert.equal(result.data.error_message, "Evidence index is unavailable.");
+});
+
+test("dashboard summary in demo mode returns the fallback without calling the network", async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCalls = 0;
+  globalThis.fetch = (async () => {
+    fetchCalls += 1;
+    throw new Error("network should not be used in demo mode");
+  }) as typeof fetch;
+
+  try {
+    const result = await apiClient.fetchDashboardSummary({
+      demoMode: true,
+      fallback: buildDemoDashboardSummary,
+      fallbackMessage: "demo snapshot",
+    });
+
+    assert.equal(fetchCalls, 0);
+    assert.equal(result.mode, "demo");
+    assert.equal(result.data.metrics.length, 4);
+    assert.equal(result.data.reports_queue[0]?.risk, "Critical");
+    assert.equal(result.warning, "demo snapshot");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

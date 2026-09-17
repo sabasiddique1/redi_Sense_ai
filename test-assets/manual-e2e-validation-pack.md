@@ -1,4 +1,4 @@
-# ReportIQ Manual E2E Validation Pack
+# RediSense Manual E2E Validation Pack
 
 Use this pack to test the main connected flows with the seeded patient and local evidence index.
 

@@ -1,1 +1,1 @@
-"""ReportIQ backend package."""
+"""RediSense backend package."""

@@ -743,7 +743,7 @@ def _triage_fallback(symptoms: str, *, fallback_reason: str) -> dict[str, Any]:
 
 
 def _copilot_fallback(message: str, context: str | None, *, fallback_reason: str) -> dict[str, Any]:
-  reply = "ReportIQ can summarize findings, triage risk, and surface evidence, but it is not a diagnosis engine."
+  reply = "RediSense can summarize findings, triage risk, and surface evidence, but it is not a diagnosis engine."
   if context:
     reply += f" Patient context was provided. Use it to confirm the active concern in the chart before acting.\n\nQuestion: {message}"
   else:

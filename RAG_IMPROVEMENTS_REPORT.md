@@ -36,7 +36,7 @@ The codebase already had a retrieval subsystem, but it was not operating as a fu
   - Added `insufficient_evidence` and `rag_trace` to `CopilotChatResponse`.
   - Added optional `trace` to `EvidenceSearchResult`.
 
-- `backend/services/vector_service.py
+- `backend/services/vector_service.py`
   - Replaced fixed character chunking with section-aware, paragraph-aware, approximate token-based chunking.
   - Added denormalized `search_text` support for lexical retrieval.
   - Added indexed SQL full-text lexical retrieval with Python fallback.
@@ -202,7 +202,7 @@ Yes.
 Run:
 
 ```bash
-cd /Users/saba/Desktop/Projects/clin_assist/backend
+cd backend
 source .venv/bin/activate
 PYTHONPATH=.. .venv/bin/alembic -c alembic.ini upgrade head
 ```
@@ -219,7 +219,7 @@ Reason:
 Run:
 
 ```bash
-cd /Users/saba/Desktop/Projects/clin_assist/backend
+cd backend
 source .venv/bin/activate
 PYTHONPATH=.. .venv/bin/python -m backend.scripts.ingest_evidence --allow-heuristic-fallback
 ```
@@ -273,7 +273,7 @@ Added:
 Run:
 
 ```bash
-cd /Users/saba/Desktop/Projects/clin_assist/backend
+cd backend
 source .venv/bin/activate
 PYTHONPATH=.. .venv/bin/python -m backend.scripts.evaluate_rag
 ```

@@ -1,18 +1,24 @@
+"use client";
+
+import { useEffect } from "react";
+
+import { useAppState } from "@/hooks/useAppState";
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
 }
 
+/**
+ * Pages declare their title and context here; the top bar renders them
+ * (design: no in-page header). Also keeps the document title in sync.
+ */
 export function PageHeader({ title, subtitle }: PageHeaderProps) {
-  return (
-    <header className="space-y-1">
-      <h1 className="text-lg font-semibold tracking-[-0.02em] text-[#101828]">
-        {title}
-      </h1>
-      {subtitle && (
-        <p className="max-w-2xl text-xs text-[#667085]">{subtitle}</p>
-      )}
-    </header>
-  );
+  const { setPageHeader } = useAppState();
+  useEffect(() => {
+    setPageHeader({ title, context: subtitle });
+    document.title = `${title} · RediSense`;
+    return () => setPageHeader(null);
+  }, [title, subtitle, setPageHeader]);
+  return <h1 className="sr-only">{title}</h1>;
 }
-

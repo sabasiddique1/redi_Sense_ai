@@ -1,45 +1,24 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PageHeader } from "../shared/PageHeader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { User, Phone, Calendar, AlertTriangle, CheckCircle } from "lucide-react";
-import { mockPatientProfile } from "../mock-data/patient-profile";
-import { apiClient, ApiError } from "@/lib/api";
-import type { PatientProfileResponse } from "@/lib/contracts";
+import { useEffect, useMemo, useState } from "react";
+import { AlertTriangle, CheckCircle2, User } from "lucide-react";
+
+import { Sparkline, SparklineEmpty } from "@/components/charts/Sparkline";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { ModeBadge } from "@/components/ui/mode-badge";
+import { MrnChip } from "@/components/ui/mrn-chip";
+import { SeverityChip } from "@/components/ui/severity-chip";
+import { TimelineItem } from "@/components/ui/timeline-item";
+import { cn } from "@/components/ui/cn";
 import { useAppState } from "@/hooks/useAppState";
+import { apiClient, ApiError } from "@/lib/api";
+import type { PatientProfileResponse, ResultMode, TimelineEventResponse } from "@/lib/contracts";
+import { mockPatientProfile, mockVitalsHistory } from "../mock-data/patient-profile";
+import { PageHeader } from "../shared/PageHeader";
+import { EmptyState, ErrorState, SkeletonCard } from "../shared/PageStates";
+import { mapTimelineEvent, type TimelineViewEvent } from "../timeline/view-model";
 
-type PatientView = typeof mockPatientProfile;
-
-function mapPatientResponseToView(payload: PatientProfileResponse): PatientView {
-  return {
-    name: payload.name,
-    mrn: payload.mrn ?? "N/A",
-    dob: payload.dob ?? "N/A",
-    gender: payload.gender ?? "Unknown",
-    overview: {
-      "Primary care": payload.primary_clinician ?? "Not provided",
-      Allergies: payload.allergies.join(", ") || "None listed",
-      "Pre-existing": payload.conditions.join(", ") || "None listed",
-      "Last lab": String(payload.profile_metadata.last_lab ?? "Not provided"),
-      ASA: String(payload.profile_metadata.asa_classification ?? "Not provided"),
-      "ICU need": String(payload.profile_metadata.icu_need ?? "Not provided"),
-    },
-    reports: payload.recent_reports.map((report) => ({
-      id: String(report.id),
-      modality: report.title ?? report.classification ?? report.modality ?? "Report",
-      date: new Date(report.created_at).toLocaleDateString(),
-      status: report.summary ? "Reviewed" : "Pending",
-    })),
-    medications: payload.medications,
-    history: payload.history_summary ?? "No history summary available.",
-    aiNotes: payload.ai_notes ?? "No AI notes available.",
-    alerts: payload.alerts,
-    tasks: payload.tasks,
-  };
-}
+type ReportRow = PatientProfileResponse["recent_reports"][number];
 
 function buildDemoPatientResponse(): PatientProfileResponse {
   return {
@@ -67,244 +46,281 @@ function buildDemoPatientResponse(): PatientProfileResponse {
       title: report.modality,
       modality: report.modality,
       classification: report.status,
-      summary: null,
-      created_at: new Date().toISOString(),
+      summary: report.summary,
+      created_at: `${report.date}T09:00:00Z`,
     })),
     created_at: new Date().toISOString(),
   };
 }
 
+function ageSex(dob: string | null, gender: string | null): string | null {
+  const parts: string[] = [];
+  if (dob) {
+    const birth = new Date(dob);
+    if (!Number.isNaN(birth.getTime())) {
+      const now = new Date();
+      let age = now.getFullYear() - birth.getFullYear();
+      if (now < new Date(now.getFullYear(), birth.getMonth(), birth.getDate())) age -= 1;
+      parts.push(String(age));
+    }
+  }
+  if (gender) parts.push(gender.charAt(0).toUpperCase());
+  return parts.length ? parts.join(" / ") : null;
+}
+
+function Field({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div className="rounded-md bg-surface-sunken px-3 py-2">
+      <p className="text-2xs text-ink-500">{label}</p>
+      <p className={cn("text-xs font-medium text-ink-900", mono && "font-mono rs-tabular")}>{value}</p>
+    </div>
+  );
+}
+
 export function PatientProfilePage() {
-  const { demoMode, selectedPatientId, activityVersion } = useAppState();
-  const [activeTab, setActiveTab] = useState("overview");
-  const [patient, setPatient] = useState<PatientView | null>(demoMode ? mockPatientProfile : null);
+  const { demoMode, selectedPatientId, activityVersion, hydrated } = useAppState();
+  const [patient, setPatient] = useState<PatientProfileResponse | null>(null);
+  const [events, setEvents] = useState<TimelineViewEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [mode, setMode] = useState<ResultMode>("real");
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!hydrated) return;
     if (!selectedPatientId) {
+      setLoading(false);
       return;
     }
-
     let cancelled = false;
-
-    const loadPatient = async () => {
+    const load = async () => {
+      setLoading(true);
       try {
-        const result = await apiClient.fetchPatient(selectedPatientId, {
-          demoMode,
-          fallback: buildDemoPatientResponse,
-          fallbackMessage: "Demo mode is enabled. Showing demo profile data.",
-        });
-        if (cancelled) {
-          return;
-        }
-        setPatient(mapPatientResponseToView(result.data));
-        setError(result.warning ?? null);
+        const [profile, timeline] = await Promise.all([
+          apiClient.fetchPatient(selectedPatientId, { demoMode, fallback: buildDemoPatientResponse, fallbackMessage: "Demo mode is enabled. Showing demo profile data." }),
+          apiClient.fetchTimeline(selectedPatientId, { demoMode, fallback: (): TimelineEventResponse[] => [], fallbackMessage: undefined }),
+        ]);
+        if (cancelled) return;
+        setPatient(profile.data);
+        setEvents(timeline.data.map(mapTimelineEvent));
+        setMode(profile.mode);
+        setError(profile.warning ?? null);
       } catch (caughtError) {
-        if (cancelled) {
-          return;
-        }
-        setError(
-          caughtError instanceof ApiError
-            ? caughtError.message
-            : "Unable to load the connected patient profile.",
-        );
-        if (!demoMode) {
-          setPatient(null);
-        }
+        if (cancelled) return;
+        setError(caughtError instanceof ApiError ? caughtError.message : "Unable to load the connected patient profile.");
+        setMode("error");
+        if (!demoMode) setPatient(null);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
     };
-
-    void loadPatient();
-
+    void load();
     return () => {
       cancelled = true;
     };
-  }, [activityVersion, demoMode, selectedPatientId]);
+  }, [activityVersion, demoMode, selectedPatientId, hydrated]);
 
-  const displayedPatient = selectedPatientId ? patient : demoMode ? mockPatientProfile : null;
+  const triageSessions = useMemo(() => events.filter((e) => e.type === "triage").slice(0, 6), [events]);
+  const riskTrend = useMemo(() => {
+    const sessions = [...triageSessions].reverse();
+    return { values: sessions.map((s) => (s.risk ? ["Low", "Moderate", "High", "Critical"].indexOf(s.risk) : 0)), markers: sessions.map((s) => s.risk) };
+  }, [triageSessions]);
+  const lastVisit = events[0]?.date ?? null;
+  const vitalsHistory = demoMode ? mockVitalsHistory : null;
 
-  if (!displayedPatient) {
+  const reportColumns: DataTableColumn<ReportRow>[] = [
+    { id: "date", header: "Date", mono: true, cell: (row) => new Date(row.created_at).toLocaleDateString([], { year: "numeric", month: "2-digit", day: "2-digit" }) },
+    { id: "modality", header: "Modality", cell: (row) => <span className="font-semibold text-ink-900">{row.title ?? row.modality ?? row.classification ?? "Report"}</span> },
+    { id: "summary", header: "Summary", cell: (row) => <span className="line-clamp-2">{row.summary ?? "No summary recorded"}</span>, width: "45%" },
+    // TODO(backend): ReportListItem.risk — recent_reports carry no derived risk; the dashboard derives it from structured_data.safety_flags.
+    { id: "risk", header: "Risk", cell: () => <span className="text-2xs text-ink-400">Not scored</span> },
+  ];
+
+  if (!selectedPatientId || (!patient && !loading)) {
     return (
       <div className="space-y-5">
-        <PageHeader
-          title="Patient Profile"
-          subtitle="Clinical overview, reports, medications, and AI-assisted notes."
-        />
-        <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-12 text-center shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-          <p className="text-sm text-[#98A2B3]">
-            {error
-              ? "The connected patient profile is unavailable. Restore the backend service or enable demo mode explicitly."
-              : "Select a patient to load the connected profile."}
-          </p>
-          {error ? <p className="mt-3 text-[11px] text-[#B42318]">{error}</p> : null}
-        </Card>
+        <PageHeader title="Patient Profile" subtitle="Clinical overview, reports, medications, and AI-assisted notes." />
+        {error ? <ErrorState title="The connected patient profile is unavailable" description={error} /> : <EmptyState icon={User} title="No patient selected" description="Choose a patient from the top navigation to load the connected profile." />}
       </div>
     );
   }
 
+  if (!patient) {
+    return (
+      <div className="space-y-5" aria-busy="true">
+        <PageHeader title="Patient Profile" subtitle="Clinical overview, reports, medications, and AI-assisted notes." />
+        <SkeletonCard lines={2} />
+        <div className="grid gap-4 lg:grid-cols-2">
+          <SkeletonCard lines={4} />
+          <SkeletonCard lines={4} />
+        </div>
+        <SkeletonCard lines={3} />
+      </div>
+    );
+  }
+
+  const initials = patient.name.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
+  const allergies = patient.allergies.filter(Boolean);
+  const latestRisk = triageSessions[0]?.risk ?? null;
+
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Patient Profile"
-        subtitle="Clinical overview, reports, medications, and AI-assisted notes."
-      />
+      <PageHeader title="Patient Profile" subtitle="Clinical overview, reports, medications, and AI-assisted notes." />
+      <div className="flex flex-wrap items-center gap-2 text-2xs text-ink-500">
+        <ModeBadge mode={mode} />
+        {error && mode !== "error" ? <span>{error}</span> : null}
+      </div>
 
-      <div className="grid gap-5 lg:grid-cols-12">
-        {/* Main content */}
-        <div className="space-y-4 lg:col-span-8">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-            <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-[#EAF2FF] text-2xl font-semibold text-[#4C8DFF]">
-                  <User className="h-8 w-8" />
-              </div>
-              <div className="flex-1">
-                <h2 className="text-lg font-semibold text-[#101828]">
-                  {displayedPatient.name}
-                </h2>
-                <p className="text-xs text-[#667085]">
-                  MRN {displayedPatient.mrn} · DOB {displayedPatient.dob} · {displayedPatient.gender}
-                </p>
-                <div className="mt-2 flex gap-2">
-                  <Button variant="outline" size="sm" className="gap-1.5">
-                    <Phone className="h-3.5 w-3.5" />
-                    Call
-                  </Button>
-                  <Button size="sm" className="gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" />
-                    Schedule visit
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="space-y-3">
-            <div className="inline-flex items-center gap-1 rounded-full bg-[#F2F4F7] p-1">
-              {(["overview", "reports", "medications", "history", "ai-notes"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
-                    activeTab === tab
-                      ? "bg-[#111111] text-white"
-                      : "text-[#667085] hover:text-[#101828]"
-                  }`}
-                >
-                  {tab === "ai-notes" ? "AI notes" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {activeTab === "overview" && (
-            <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {Object.entries(displayedPatient.overview).map(([k, v]) => (
-                    <div key={k} className="rounded-[14px] bg-[#F8FAFD] px-3 py-2">
-                      <p className="text-[11px] text-[#667085]">{k}</p>
-                      <p className="text-xs font-medium text-[#101828]">{v}</p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            )}
-            {activeTab === "reports" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <ul className="space-y-2">
-                  {displayedPatient.reports.map((r) => (
-                    <li
-                      key={r.id}
-                      className="flex items-center justify-between rounded-[14px] bg-[#F8FAFD] px-3 py-2"
-                    >
-                      <span className="text-xs font-medium text-[#101828]">
-                        {r.modality} — {r.date}
-                      </span>
-                      <Badge tone="outline">{r.status}</Badge>
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
-            {activeTab === "medications" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <ul className="space-y-2">
-                  {displayedPatient.medications.map((m) => (
-                    <li
-                      key={m}
-                      className="rounded-[14px] bg-[#F8FAFD] px-3 py-2 text-xs text-[#101828]"
-                    >
-                      {m}
-                    </li>
-                  ))}
-                </ul>
-              </Card>
-            )}
-            {activeTab === "history" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <p className="text-xs text-[#667085]">{displayedPatient.history}</p>
-              </Card>
-            )}
-            {activeTab === "ai-notes" && (
-              <Card className="rounded-[20px] border border-[#E6ECF5] bg-white p-5 shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-                <p className="text-xs text-[#667085]">{displayedPatient.aiNotes}</p>
-              </Card>
-            )}
+      <section className="card-surface flex flex-wrap items-center gap-5 p-5" aria-label="Patient header">
+        <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent-100 text-sm font-semibold text-accent-700" aria-hidden="true">{initials}</span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-lg font-semibold text-ink-900">{patient.name}</h2>
+          <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-500">
+            <MrnChip name={patient.name} mrn={patient.mrn} ageSex={ageSex(patient.dob, patient.gender)} riskLevel={latestRisk} compact className="text-xs" />
+            {ageSex(patient.dob, patient.gender) ? <span>· {ageSex(patient.dob, patient.gender)}</span> : null}
+            {allergies.length > 0 ? (
+              <span className="inline-flex items-center gap-1 rounded-pill bg-severity-high-bg px-2 py-0.5 text-2xs font-semibold text-severity-high">
+                <AlertTriangle className="h-3 w-3" aria-hidden="true" />
+                {allergies.join(", ")} allergy
+              </span>
+            ) : null}
+            {patient.primary_clinician ? <span>· Primary: {patient.primary_clinician}</span> : null}
           </div>
         </div>
+        <div className="w-[140px]">
+          <p className="text-2xs text-ink-500">Risk trend · last {triageSessions.length || 6} sessions</p>
+          <div className="mt-1 h-[30px]">
+            {riskTrend.values.length >= 2 ? <Sparkline values={riskTrend.values} markers={riskTrend.markers} height={30} title="Risk trend across recent triage sessions" /> : <SparklineEmpty height={30} message="Fewer than 2 sessions" />}
+          </div>
+        </div>
+      </section>
 
-        {/* Sidebar: Alerts + Tasks */}
-        <div className="space-y-4 lg:col-span-4">
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-[#EF4444]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
-                  Alerts
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2 pt-0">
-              {displayedPatient.alerts.map((a) => (
-                <div
-                  key={a.id}
-                  className="flex items-start gap-2 rounded-[14px] bg-[#FEF2F2] px-3 py-2"
-                >
-                  <span className="text-red-500">●</span>
-                  <div>
-                    <p className="text-xs font-medium text-[#B91C1C]">{a.label}</p>
-                    <p className="text-[11px] text-[#7F1D1D]">{a.detail}</p>
-                  </div>
-                </div>
-              ))}
-            </CardContent>
-          </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="card-surface p-5" aria-labelledby="profile-demographics">
+          <h2 id="profile-demographics" className="text-sm font-semibold text-ink-900">Demographics</h2>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <Field label="Date of birth" value={patient.dob ?? "Not recorded"} mono />
+            {/* TODO(backend): patients.insurance and patients.language are not modelled yet. */}
+            <Field label="Insurance" value={String(patient.profile_metadata.insurance ?? "Not recorded")} />
+            <Field label="Language" value={String(patient.profile_metadata.language ?? "Not recorded")} />
+            <Field label="Last visit" value={lastVisit ? lastVisit.toLocaleDateString([], { year: "numeric", month: "2-digit", day: "2-digit" }) : "No events yet"} mono />
+            <Field label="Primary care" value={patient.primary_clinician ?? "Not recorded"} />
+            <Field label="Last lab" value={String(patient.profile_metadata.last_lab ?? "Not recorded")} mono />
+          </div>
+          {patient.medications.length > 0 ? (
+            <div className="mt-3">
+              <p className="text-2xs font-semibold uppercase tracking-[0.05em] text-ink-500">Medications</p>
+              <ul className="mt-1.5 flex flex-wrap gap-1.5">
+                {patient.medications.map((medication) => (
+                  <li key={medication} className="rounded-pill border border-border-hairline px-2.5 py-0.5 text-2xs text-ink-700">{medication}</li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </section>
 
-          <Card className="rounded-[20px] border border-[#E6ECF5] bg-white shadow-[0_18px_45px_rgba(15,23,42,0.04),0_2px_8px_rgba(15,23,42,0.02)]">
-            <CardHeader className="pb-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-[#4C8DFF]" />
-                <CardTitle className="text-sm font-semibold text-[#101828]">
-                  Tasks
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-2 pt-0">
-              {displayedPatient.tasks.map((t) => (
-                <div
-                  key={t.id}
-                  className="flex items-center justify-between rounded-[14px] bg-[#F8FAFD] px-3 py-2"
-                >
-                  <p className="text-xs text-[#101828]">{t.label}</p>
-                  <Badge tone={t.status === "Done" ? "success" : "default"}>
-                    {t.status}
-                  </Badge>
-                </div>
+        <section className="card-surface p-5" aria-labelledby="profile-conditions">
+          <h2 id="profile-conditions" className="text-sm font-semibold text-ink-900">Active conditions</h2>
+          {/* TODO(backend): conditions carry no onset/resolved dates, so the design's year axis is demo-only. */}
+          {patient.conditions.length === 0 ? (
+            <p className="mt-3 text-xs text-ink-400">No conditions recorded.</p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {patient.conditions.map((condition) => (
+                <li key={condition} className="flex items-center justify-between gap-3 rounded-md bg-surface-sunken px-3 py-2 text-xs">
+                  <span className="font-medium text-ink-900">{condition}</span>
+                  <span className="text-2xs text-ink-400">{demoMode ? "since 2015" : "onset not recorded"}</span>
+                </li>
               ))}
-            </CardContent>
-          </Card>
+            </ul>
+          )}
+          {patient.history_summary ? <p className="mt-3 text-2xs leading-relaxed text-ink-500">{patient.history_summary}</p> : null}
+        </section>
+      </div>
+
+      <section className="card-surface p-5" aria-labelledby="profile-vitals">
+        <div className="flex items-baseline justify-between">
+          <h2 id="profile-vitals" className="text-sm font-semibold text-ink-900">Vitals history</h2>
+          <span className="text-2xs text-ink-500">Last 30 days</span>
+        </div>
+        {vitalsHistory ? (
+          <div className="mt-3 grid gap-4 sm:grid-cols-3">
+            {vitalsHistory.map((vital) => (
+              <div key={vital.label}>
+                <p className="text-2xs font-semibold uppercase tracking-[0.04em] text-ink-500">
+                  {vital.label} <span className="font-normal normal-case tracking-normal text-ink-400">{vital.unit}</span>
+                </p>
+                <div className="mt-2 h-[40px]">
+                  <Sparkline values={vital.values} secondary={vital.secondary} height={40} stroke={vital.stroke} title={`${vital.label}, last 30 days`} />
+                </div>
+                <p className="mt-1 text-2xs text-ink-700">{vital.caption}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // TODO(backend): a vitals table (patient_id, taken_at, systolic, diastolic, hr, spo2) would feed these charts.
+          <p className="mt-3 rounded-md border border-dashed border-border-strong px-3 py-3 text-2xs text-ink-500">Not available — needs vitals history. Triage sessions capture vitals at intake but they are not persisted as a series yet.</p>
+        )}
+      </section>
+
+      <section className="card-surface p-5" aria-labelledby="profile-reports">
+        <h2 id="profile-reports" className="text-sm font-semibold text-ink-900">Recent reports</h2>
+        <div className="mt-3">
+          <DataTable caption="Recent reports" columns={reportColumns} rows={patient.recent_reports} rowKey={(row) => String(row.id)} emptyMessage="No reports on record." />
+        </div>
+      </section>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_320px]">
+        <section className="card-surface p-5" aria-labelledby="profile-triage">
+          <h2 id="profile-triage" className="text-sm font-semibold text-ink-900">Recent triage sessions</h2>
+          {triageSessions.length === 0 ? (
+            <p className="mt-3 text-xs text-ink-400">No triage sessions recorded for this patient.</p>
+          ) : (
+            <ol className="mt-3 space-y-3">
+              {triageSessions.map((session) => (
+                <TimelineItem key={session.id} time={session.date.toLocaleDateString([], { month: "short", day: "numeric" })} title={session.title} detail={session.detail} type="triage" risk={session.risk} />
+              ))}
+            </ol>
+          )}
+        </section>
+        <div className="space-y-4">
+          <section className="card-surface p-5" aria-labelledby="profile-alerts">
+            <h2 id="profile-alerts" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+              <AlertTriangle className="h-4 w-4 text-severity-critical" aria-hidden="true" />
+              Alerts
+            </h2>
+            {patient.alerts.length === 0 ? (
+              <p className="mt-3 text-xs text-ink-400">No alerts on file.</p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {patient.alerts.map((alert) => (
+                  <li key={alert.id} className="rounded-md border border-severity-high/30 bg-severity-high-bg px-3 py-2">
+                    <p className="text-xs font-semibold text-severity-high">{alert.label}</p>
+                    <p className="text-2xs text-ink-700">{alert.detail}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          <section className="card-surface p-5" aria-labelledby="profile-tasks">
+            <h2 id="profile-tasks" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+              <CheckCircle2 className="h-4 w-4 text-accent-600" aria-hidden="true" />
+              Tasks
+            </h2>
+            {patient.tasks.length === 0 ? (
+              <p className="mt-3 text-xs text-ink-400">No open tasks.</p>
+            ) : (
+              <ul className="mt-3 space-y-2">
+                {patient.tasks.map((task) => (
+                  <li key={task.id} className="flex items-center justify-between gap-2 rounded-md bg-surface-sunken px-3 py-2 text-xs">
+                    <span className="text-ink-900">{task.label}</span>
+                    <SeverityChip level={task.status === "Done" ? "Low" : task.status === "Pending" ? "Moderate" : null} label={task.status} showGlyph={false} />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       </div>
-      {error ? <p className="text-[11px] text-[#B45309]">{error}</p> : null}
     </div>
   );
 }

@@ -9,7 +9,7 @@ import {
 } from "react";
 
 import { mockPatientProfile } from "@/features/mock-data/patient-profile";
-import { apiBaseUrl, apiClient } from "@/lib/api";
+import { apiBaseUrl, apiClient, readStorageWithLegacyFallback } from "@/lib/api";
 import type {
   PatientListItem,
   PublicConfigResponse,
@@ -18,9 +18,15 @@ import type {
 } from "@/lib/contracts";
 
 
-const DEMO_MODE_KEY = "reportiq-demo-mode";
-const SELECTED_PATIENT_KEY = "reportiq-selected-patient";
-const TRIAGE_STATE_KEY = "reportiq-triage-state";
+const DEMO_MODE_KEY = "redisense-demo-mode";
+const SELECTED_PATIENT_KEY = "redisense-selected-patient";
+const TRIAGE_STATE_KEY = "redisense-triage-state";
+// Pre-rename keys; read once and migrated by readStorageWithLegacyFallback.
+const LEGACY_DEMO_MODE_KEY = "reportiq-demo-mode";
+const LEGACY_SELECTED_PATIENT_KEY = "reportiq-selected-patient";
+const LEGACY_TRIAGE_STATE_KEY = "reportiq-triage-state";
+const SIDEBAR_KEY = "redisense-sidebar-collapsed";
+const LEGACY_SIDEBAR_KEY = "reportiq-sidebar-collapsed";
 
 type SavedTriageState = {
   draft: TriageDraft;
@@ -71,7 +77,11 @@ function readStoredTriageStates(): Record<string, SavedTriageState> {
     return {};
   }
 
-  const storedValue = window.localStorage.getItem(TRIAGE_STATE_KEY);
+  const storedValue = readStorageWithLegacyFallback(
+    window.localStorage,
+    TRIAGE_STATE_KEY,
+    LEGACY_TRIAGE_STATE_KEY,
+  );
   if (!storedValue) {
     return {};
   }
@@ -114,7 +124,11 @@ function readStoredDemoMode(): boolean {
     return initialDemoMode;
   }
 
-  const storedDemoMode = window.localStorage.getItem(DEMO_MODE_KEY);
+  const storedDemoMode = readStorageWithLegacyFallback(
+    window.localStorage,
+    DEMO_MODE_KEY,
+    LEGACY_DEMO_MODE_KEY,
+  );
   return storedDemoMode !== null ? storedDemoMode === "true" : initialDemoMode;
 }
 
@@ -123,7 +137,11 @@ function readStoredPatientId(): number | null {
     return 1;
   }
 
-  const storedPatientId = window.localStorage.getItem(SELECTED_PATIENT_KEY);
+  const storedPatientId = readStorageWithLegacyFallback(
+    window.localStorage,
+    SELECTED_PATIENT_KEY,
+    LEGACY_SELECTED_PATIENT_KEY,
+  );
   if (!storedPatientId) {
     return 1;
   }
@@ -134,8 +152,21 @@ function readStoredPatientId(): number | null {
     : 1;
 }
 
+export type AppUser = {
+  name: string;
+  role: string;
+};
+
+// There is no user/identity endpoint yet (Auth0 is optional and verifies tokens
+// only), so both modes present the demo clinician. Swap this for the verified
+// identity once a /me route exists.
+export const DEMO_USER: AppUser = { name: "Dr. A. Hernandez", role: "Internal Medicine" };
+
 type AppStateContextValue = {
   apiBaseUrl: string;
+  user: AppUser;
+  /** True once persisted demo/patient/triage state has been read on the client. */
+  hydrated: boolean;
   demoMode: boolean;
   setDemoMode: (value: boolean) => void;
   patients: PatientListItem[];
@@ -154,6 +185,18 @@ type AppStateContextValue = {
   triageTimelineMessage: string | null;
   setTriageTimelineMessage: (value: string | null) => void;
   notifyPatientActivity: (message: string, patientId?: number | null) => void;
+  /** Copilot drawer is global (opened from the top bar and from evidence cards). */
+  copilotOpen: boolean;
+  copilotPrefill: string | null;
+  openCopilot: (prefill?: string) => void;
+  closeCopilot: () => void;
+  clearCopilotPrefill: () => void;
+  /** Page title + context rendered by the top bar (pages register via <PageHeader>). */
+  pageHeader: { title: string; context?: string } | null;
+  setPageHeader: (header: { title: string; context?: string } | null) => void;
+  /** Manual sidebar collapse, persisted per browser. */
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -173,31 +216,40 @@ function getDemoPatients(): PatientListItem[] {
 const initialDemoMode = process.env.NEXT_PUBLIC_DEMO_MODE === "true";
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [demoMode, setDemoModeState] = useState(readStoredDemoMode);
-  const [patients, setPatients] = useState<PatientListItem[]>(() =>
-    demoMode ? getDemoPatients() : [],
-  );
-  const [selectedPatientId, setSelectedPatientIdState] = useState<number | null>(
-    readStoredPatientId,
-  );
+  // Server and first client render use defaults; localStorage is read in the
+  // hydration effect below so the two renders never disagree.
+  const [hydrated, setHydrated] = useState(false);
+  const [demoMode, setDemoModeState] = useState(initialDemoMode);
+  const [patients, setPatients] = useState<PatientListItem[]>([]);
+  const [selectedPatientId, setSelectedPatientIdState] = useState<number | null>(1);
   const [patientsLoading, setPatientsLoading] = useState(true);
   const [patientsWarning, setPatientsWarning] = useState<string | null>(null);
   const [publicConfig, setPublicConfig] = useState<PublicConfigResponse | null>(null);
   const [activityVersion, setActivityVersion] = useState(0);
   const [lastActivityMessage, setLastActivityMessage] = useState<string | null>(null);
-  const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>(
-    readStoredTriageStates,
-  );
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [copilotPrefill, setCopilotPrefill] = useState<string | null>(null);
+  const [pageHeader, setPageHeader] = useState<{ title: string; context?: string } | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
+  const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>({});
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    setDemoModeState(readStoredDemoMode());
+    setSelectedPatientIdState(readStoredPatientId());
+    setTriageStates(readStoredTriageStates());
+    setSidebarCollapsedState(readStorageWithLegacyFallback(window.localStorage, SIDEBAR_KEY, LEGACY_SIDEBAR_KEY) === "true");
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) {
       return;
     }
     window.localStorage.setItem(DEMO_MODE_KEY, String(demoMode));
-  }, [demoMode]);
+  }, [demoMode, hydrated]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!hydrated) {
       return;
     }
 
@@ -207,17 +259,21 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     }
 
     window.localStorage.setItem(SELECTED_PATIENT_KEY, String(selectedPatientId));
-  }, [selectedPatientId]);
+  }, [selectedPatientId, hydrated]);
 
   useEffect(() => {
-    if (typeof window === "undefined") {
+    if (!hydrated) {
       return;
     }
 
     window.localStorage.setItem(TRIAGE_STATE_KEY, JSON.stringify(triageStates));
-  }, [triageStates]);
+  }, [triageStates, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) {
+      return;
+    }
+
     let cancelled = false;
 
     const loadPatients = async () => {
@@ -268,7 +324,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [demoMode]);
+  }, [demoMode, hydrated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -319,6 +375,22 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     updateCurrentTriageState((state) => ({ ...state, timelineMessage: value }));
   };
 
+  const setSidebarCollapsed = (collapsed: boolean) => {
+    setSidebarCollapsedState(collapsed);
+    try {
+      window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
+    } catch {
+      // storage unavailable
+    }
+  };
+
+  const openCopilot = (prefill?: string) => {
+    if (prefill) setCopilotPrefill(prefill);
+    setCopilotOpen(true);
+  };
+  const closeCopilot = () => setCopilotOpen(false);
+  const clearCopilotPrefill = () => setCopilotPrefill(null);
+
   const notifyPatientActivity = (message: string, patientId?: number | null) => {
     setLastActivityMessage(message);
     setActivityVersion((current) => current + 1);
@@ -331,6 +403,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     <AppStateContext.Provider
       value={{
         apiBaseUrl,
+        user: DEMO_USER,
+        hydrated,
         demoMode,
         setDemoMode: setDemoModeState,
         patients,
@@ -349,6 +423,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         triageTimelineMessage: currentTriageState.timelineMessage,
         setTriageTimelineMessage,
         notifyPatientActivity,
+        copilotOpen,
+        copilotPrefill,
+        openCopilot,
+        closeCopilot,
+        clearCopilotPrefill,
+        pageHeader,
+        setPageHeader,
+        sidebarCollapsed,
+        setSidebarCollapsed,
       }}
     >
       {children}

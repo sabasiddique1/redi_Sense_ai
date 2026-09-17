@@ -47,7 +47,9 @@
 # =========================
 .env*
 /backend/.env*
+!/backend/.env.example
 /frontend/.env*
+!/frontend/.env.example
 
 # =========================
 # Project generated files
@@ -106,3 +108,6 @@ __pycache__/
 *.db
 *.sqlite3frontend.zip
 frontend.zip
+
+# Local Claude Code launch config
+/.claude/

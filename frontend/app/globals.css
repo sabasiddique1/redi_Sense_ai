@@ -1,52 +1,316 @@
 @import "tailwindcss";
 
-@theme inline {
-  /* Fonts */
-  --font-sans: var(--font-inter);
+/* Tailwind `dark:` utilities follow the data-theme attribute, not the OS. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-  /* App colors */
-  --color-app-background: #f4f7fb;
-  --color-app-foreground: #101828;
-  --color-surface: #ffffff;
-  --color-surface-muted: #f8fafd;
-  --color-border-subtle: #e6ecf5;
-  --color-text-primary: #101828;
-  --color-text-secondary: #667085;
-
-  --color-primary: #4c8dff;
-  --color-primary-soft: #eaf2ff;
-  --color-primary-hover: #3778f6;
-
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-
-  --color-pill-active: #111111;
-
-  /* Radii */
-  --radius-shell: 28px;
-  --radius-card: 20px;
-  --radius-lg: 14px;
-  --radius-md: 10px;
-  --radius-sm: 8px;
-
-  /* Shadows */
-  --shadow-soft:
-    0 18px 45px rgba(15, 23, 42, 0.04),
-    0 2px 8px rgba(15, 23, 42, 0.02);
-}
-
+/*
+ * RediSense design tokens (--rs-*).
+ * Source of truth: design/RediSense Foundations.dc.html v0.3 (66 tokens).
+ * Light values live on :root, dark values on [data-theme="dark"]. Every colour
+ * in the app resolves to one of these; the Tailwind theme block below only maps
+ * them onto utility names. Do not add hex values anywhere else.
+ */
 :root {
   color-scheme: light;
+
+  /* Surfaces & structure */
+  --rs-bg-shell: #F6F8FB;
+  --rs-bg-canvas: #F6F8FB;
+  --rs-surface: #FFFFFF;
+  --rs-surface-raised: #FFFFFF;
+  --rs-surface-sunken: #EEF2F7;
+  --rs-border-hairline: #DCE3EE;
+  --rs-border-strong: #C3CEDF;
+  --rs-border-focus: #0D9488;
+
+  /* Ink */
+  --rs-ink-900: #0B1220;
+  --rs-ink-700: #33415A;
+  --rs-ink-500: #4B5A75;
+  /* Foundations: #7B8AA3 (3.5:1 on white). Darkened so captions clear 4.5:1 on surface and surface-sunken. */
+  --rs-ink-400: #5C6B85;
+  --rs-ink-300: #AEB9CC;
+  --rs-ink-on-accent: #FFFFFF;
+
+  /* Accent (clinical teal) */
+  --rs-accent-700: #0F766E;
+  --rs-accent-600: #0D9488;
+  --rs-accent-500: #14B8A6;
+  --rs-accent-100: #CCFBF1;
+  --rs-accent-050: #F0FDFA;
+  --rs-accent-glow: rgba(13, 148, 136, 0.12);
+  /* The one non-severity chart colour (trend lines, segments that are not a risk signal) */
+  --rs-data-2: #4F46E5;
+
+  /*
+   * Severity scale: colour is also the text colour on its -bg tint.
+   * Foundations values fail 4.5:1 on their own tints for low (52% → 4.49) and
+   * moderate (56% → 4.00); lightness lowered to 50% / 51% (scripts/check-contrast.mjs).
+   */
+  --rs-severity-low: oklch(50% 0.1 195);
+  --rs-severity-low-bg: oklch(95% 0.02 195);
+  --rs-severity-moderate: oklch(51% 0.15 95);
+  --rs-severity-moderate-bg: oklch(95% 0.04 95);
+  --rs-severity-high: oklch(52% 0.17 55);
+  --rs-severity-high-bg: oklch(95% 0.045 55);
+  --rs-severity-critical: oklch(46% 0.19 25);
+  --rs-severity-critical-bg: oklch(95% 0.045 25);
+
+  /*
+   * Typography. next/font (app/layout.tsx) registers @font-face for
+   * "Nunito Sans" and "DM Mono" plus their metric fallbacks; the family names
+   * are referenced directly because the next/font CSS variables live on <body>,
+   * not :root.
+   */
+  --rs-font-sans: "Nunito Sans", "Nunito Sans Fallback", Figtree, ui-sans-serif, system-ui, sans-serif;
+  --rs-font-mono: "DM Mono", "DM Mono Fallback", ui-monospace, monospace;
+  --rs-text-2xs: 11px;
+  --rs-text-xs: 12px;
+  --rs-text-sm: 13px;
+  --rs-text-md: 14px;
+  --rs-text-lg: 16px;
+  --rs-text-xl: 20px;
+  --rs-text-2xl: 28px;
+  --rs-text-3xl: 36px;
+  --rs-weight-regular: 400;
+  --rs-weight-medium: 500;
+  --rs-weight-semibold: 600;
+  --rs-weight-bold: 700;
+
+  /* Spacing (4px grid) */
+  --rs-space-1: 4px;
+  --rs-space-2: 8px;
+  --rs-space-3: 12px;
+  --rs-space-4: 16px;
+  --rs-space-5: 20px;
+  --rs-space-6: 24px;
+  --rs-space-8: 32px;
+  --rs-space-10: 40px;
+  --rs-space-12: 48px;
+  --rs-space-16: 64px;
+
+  /* Radius */
+  --rs-radius-xs: 3px;
+  --rs-radius-sm: 6px;
+  --rs-radius-md: 8px;
+  --rs-radius-lg: 12px;
+  --rs-radius-pill: 999px;
+
+  /* Elevation: hairlines separate; shadow is for drawer, popover, modal only */
+  --rs-elevation-0: none;
+  --rs-elevation-1: 0 1px 2px oklch(21% 0.012 195 / 0.07);
+  --rs-elevation-2: 0 4px 14px oklch(21% 0.012 195 / 0.10);
+  --rs-elevation-3: 0 12px 32px oklch(21% 0.012 195 / 0.14);
+
+  /* Motion */
+  --rs-motion-fast: 120ms;
+  --rs-motion-base: 180ms;
+  --rs-motion-slow: 260ms;
+  --rs-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Shell texture: 1px lines on a 4px grid (Foundations "faint grid texture") */
+  --rs-grid-line: oklch(21% 0.012 195 / 0.014);
+  --rs-grid-size: 4px;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --rs-bg-shell: #0B1220;
+  --rs-bg-canvas: #0B1220;
+  --rs-surface: #111A2B;
+  --rs-surface-raised: #141E33;
+  --rs-surface-sunken: #0E1626;
+  --rs-border-hairline: #1E2A40;
+  --rs-border-strong: #2A3B58;
+  /* Not overridden by Foundations; accent-600 dark keeps the ring visible on dark surfaces */
+  --rs-border-focus: #2DD4BF;
+
+  --rs-ink-900: #E6EDF7;
+  --rs-ink-700: #C4D0E0;
+  --rs-ink-500: #9FB0C8;
+  /* Foundations: #66768F (3.8:1). Lightened so captions clear 4.5:1 on dark surfaces. */
+  --rs-ink-400: #7A8BA6;
+  --rs-ink-300: #445369;
+  /* Not overridden by Foundations: dark accent-600 is light enough that dark ink reads better on it */
+  --rs-ink-on-accent: #0B1220;
+
+  --rs-accent-700: #14B8A6;
+  --rs-accent-600: #2DD4BF;
+  --rs-accent-500: #5EEAD4;
+  --rs-accent-100: rgba(45, 212, 191, 0.14);
+  --rs-accent-050: rgba(45, 212, 191, 0.08);
+  --rs-accent-glow: rgba(45, 212, 191, 0.18);
+  --rs-data-2: #818CF8;
+
+  --rs-severity-low: #34D399;
+  --rs-severity-low-bg: rgba(52, 211, 153, 0.14);
+  --rs-severity-moderate: #FBBF24;
+  --rs-severity-moderate-bg: rgba(251, 191, 36, 0.14);
+  --rs-severity-high: #FB923C;
+  --rs-severity-high-bg: rgba(251, 146, 60, 0.14);
+  --rs-severity-critical: #F87171;
+  --rs-severity-critical-bg: rgba(248, 113, 113, 0.14);
+
+  /*
+   * Elevation in dark mode is NOT defined in Foundations. The values below are
+   * taken from the ten dark artboards in design/RediSense Screens.dc.html,
+   * which all set elevation-1 to none and elevation-2 to a 1px border-strong
+   * ring plus a 24px accent glow. elevation-3 is not defined anywhere in the
+   * design; it is inferred here as the elevation-2 ring with a deeper drop so
+   * modals still separate from the drawer.
+   */
+  --rs-elevation-1: none;
+  --rs-elevation-2: 0 0 0 1px var(--rs-border-strong), 0 0 24px var(--rs-accent-glow);
+  --rs-elevation-3: 0 0 0 1px var(--rs-border-strong), 0 16px 40px rgba(0, 0, 0, 0.5);
+
+  --rs-grid-line: rgba(255, 255, 255, 0.02);
+}
+
+/*
+ * Tailwind utilities. Every entry references an --rs-* token so utilities
+ * re-theme with the attribute. Legacy names (primary, text-secondary, risk-*)
+ * are kept as aliases so existing classes keep working; new work should use
+ * the design names (accent-600, ink-500, severity-*).
+ */
+@theme inline {
+  /* Design breakpoint: at 1024px and below, pages stack and the sidebar becomes a 64px rail */
+  --breakpoint-lg: 1025px;
+
+  --font-sans: var(--rs-font-sans);
+  --font-mono: var(--rs-font-mono);
+
+  /* Surfaces */
+  --color-shell: var(--rs-bg-shell);
+  --color-canvas: var(--rs-bg-canvas);
+  --color-surface: var(--rs-surface);
+  --color-surface-raised: var(--rs-surface-raised);
+  --color-surface-sunken: var(--rs-surface-sunken);
+  --color-app-background: var(--rs-bg-shell);
+  --color-app-foreground: var(--rs-ink-900);
+  --color-surface-muted: var(--rs-surface-sunken);
+  --color-surface-subtle: var(--rs-surface-sunken);
+  --color-surface-hover: var(--rs-surface-sunken);
+
+  /* Borders */
+  --color-hairline: var(--rs-border-hairline);
+  --color-border-hairline: var(--rs-border-hairline);
+  --color-border-strong: var(--rs-border-strong);
+  --color-border-focus: var(--rs-border-focus);
+  --color-border-subtle: var(--rs-border-hairline);
+
+  /* Ink */
+  --color-ink-900: var(--rs-ink-900);
+  --color-ink-700: var(--rs-ink-700);
+  --color-ink-500: var(--rs-ink-500);
+  --color-ink-400: var(--rs-ink-400);
+  --color-ink-300: var(--rs-ink-300);
+  --color-ink-on-accent: var(--rs-ink-on-accent);
+  --color-text-primary: var(--rs-ink-900);
+  --color-text-body: var(--rs-ink-700);
+  --color-text-secondary: var(--rs-ink-500);
+  --color-text-tertiary: var(--rs-ink-400);
+  --color-pill-active: var(--rs-ink-900);
+
+  /* Accent */
+  --color-accent-700: var(--rs-accent-700);
+  --color-accent-600: var(--rs-accent-600);
+  --color-accent-500: var(--rs-accent-500);
+  --color-accent-100: var(--rs-accent-100);
+  --color-accent-050: var(--rs-accent-050);
+  --color-accent-glow: var(--rs-accent-glow);
+  --color-data-2: var(--rs-data-2);
+  /* Solid fills use accent-700: white on accent-600 is only 3.7:1 in light mode (design flaw, see check-contrast) */
+  --color-primary: var(--rs-accent-700);
+  --color-primary-hover: var(--rs-accent-600);
+  --color-primary-soft: var(--rs-accent-050);
+  --color-primary-strong: var(--rs-accent-700);
+  --color-primary-border: var(--rs-accent-100);
+
+  /* Severity */
+  --color-severity-low: var(--rs-severity-low);
+  --color-severity-low-bg: var(--rs-severity-low-bg);
+  --color-severity-moderate: var(--rs-severity-moderate);
+  --color-severity-moderate-bg: var(--rs-severity-moderate-bg);
+  --color-severity-high: var(--rs-severity-high);
+  --color-severity-high-bg: var(--rs-severity-high-bg);
+  --color-severity-critical: var(--rs-severity-critical);
+  --color-severity-critical-bg: var(--rs-severity-critical-bg);
+  --color-risk-low: var(--rs-severity-low);
+  --color-risk-low-soft: var(--rs-severity-low-bg);
+  --color-risk-low-text: var(--rs-severity-low);
+  --color-risk-moderate: var(--rs-severity-moderate);
+  --color-risk-moderate-soft: var(--rs-severity-moderate-bg);
+  --color-risk-moderate-text: var(--rs-severity-moderate);
+  --color-risk-high: var(--rs-severity-high);
+  --color-risk-high-soft: var(--rs-severity-high-bg);
+  --color-risk-high-text: var(--rs-severity-high);
+  --color-risk-critical: var(--rs-severity-critical);
+  --color-risk-critical-soft: var(--rs-severity-critical-bg);
+  --color-risk-critical-text: var(--rs-severity-critical);
+  --color-success: var(--rs-severity-low);
+  --color-success-soft: var(--rs-severity-low-bg);
+  --color-success-tint: var(--rs-severity-low-bg);
+  --color-success-text: var(--rs-severity-low);
+  --color-success-strong: var(--rs-severity-low);
+  --color-warning: var(--rs-severity-moderate);
+  --color-warning-soft: var(--rs-severity-moderate-bg);
+  --color-warning-tint: var(--rs-severity-moderate-bg);
+  --color-warning-border: var(--rs-severity-moderate-bg);
+  --color-warning-text: var(--rs-severity-moderate);
+  --color-warning-strong: var(--rs-severity-moderate);
+  --color-danger: var(--rs-severity-critical);
+  --color-danger-soft: var(--rs-severity-critical-bg);
+  --color-danger-border: var(--rs-severity-critical-bg);
+  --color-danger-text: var(--rs-severity-critical);
+  --color-danger-text-alt: var(--rs-severity-critical);
+  --color-danger-strong: var(--rs-severity-critical);
+  --color-accent-orange: var(--rs-severity-high);
+
+  /* Radius */
+  --radius-xs: var(--rs-radius-xs);
+  --radius-sm: var(--rs-radius-sm);
+  --radius-md: var(--rs-radius-md);
+  --radius-lg: var(--rs-radius-lg);
+  --radius-pill: var(--rs-radius-pill);
+  --radius-card: var(--rs-radius-lg);
+  --radius-shell: var(--rs-radius-lg);
+
+  /* Elevation */
+  --shadow-elevation-0: var(--rs-elevation-0);
+  --shadow-elevation-1: var(--rs-elevation-1);
+  --shadow-elevation-2: var(--rs-elevation-2);
+  --shadow-elevation-3: var(--rs-elevation-3);
+  --shadow-soft: var(--rs-elevation-0);
+
+  /* Type scale (design sizes; line-heights tuned for dense clinical UI) */
+  --text-2xs: var(--rs-text-2xs);
+  --text-2xs--line-height: 1.4;
+  --text-xs: var(--rs-text-xs);
+  --text-xs--line-height: 1.4;
+  --text-sm: var(--rs-text-sm);
+  --text-sm--line-height: 1.45;
+  --text-base: var(--rs-text-md);
+  --text-base--line-height: 1.5;
+  --text-lg: var(--rs-text-lg);
+  --text-lg--line-height: 1.4;
+  --text-xl: var(--rs-text-xl);
+  --text-xl--line-height: 1.3;
+  --text-2xl: var(--rs-text-2xl);
+  --text-2xl--line-height: 1.2;
+  --text-3xl: var(--rs-text-3xl);
+  --text-3xl--line-height: 1.1;
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: var(--color-app-background);
-  color: var(--color-app-foreground);
-  font-family: var(--font-inter), system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", sans-serif;
+  background-color: var(--rs-bg-shell);
+  color: var(--rs-ink-900);
+  font-family: var(--rs-font-sans);
+  font-size: var(--rs-text-md);
+  font-variant-numeric: tabular-nums;
+  -webkit-font-smoothing: antialiased;
 }
 
 *,
@@ -55,38 +319,72 @@ body {
   box-sizing: border-box;
 }
 
-.app-shell {
-  min-height: 100vh;
-  background-color: var(--color-app-background);
+:focus-visible {
+  outline: 2px solid var(--rs-border-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--rs-accent-glow);
 }
 
-/* Rounded app container: always full viewport height, content scrolls inside */
-.app-shell-inner {
-  height: calc(100vh - 2rem) !important;
-  min-height: calc(100vh - 2rem) !important;
+/* Colour transitions on theme switch; instant when motion is reduced */
+html[data-theme] body,
+html[data-theme] .card-surface {
+  transition:
+    background-color var(--rs-motion-base) var(--rs-motion-ease),
+    color var(--rs-motion-base) var(--rs-motion-ease),
+    border-color var(--rs-motion-base) var(--rs-motion-ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+.app-shell {
+  min-height: 100vh;
+  background-color: var(--rs-bg-shell);
+  background-image:
+    repeating-linear-gradient(0deg, var(--rs-grid-line) 0 1px, transparent 1px var(--rs-grid-size)),
+    repeating-linear-gradient(90deg, var(--rs-grid-line) 0 1px, transparent 1px var(--rs-grid-size));
+}
+
+/* Flat skeleton block: the design forbids shimmer gradients on loading states */
+.rs-skeleton {
+  border-radius: var(--rs-radius-sm);
+  background: var(--rs-surface-sunken);
 }
 
 .card-surface {
-  background-color: var(--color-surface);
-  border-radius: var(--radius-card);
-  border: 1px solid var(--color-border-subtle);
-  box-shadow: var(--shadow-soft);
+  background-color: var(--rs-surface);
+  border-radius: var(--rs-radius-lg);
+  border: 1px solid var(--rs-border-hairline);
+  box-shadow: var(--rs-elevation-0);
 }
 
 .pill-nav {
-  border-radius: 999px;
-  background-color: #f2f4f7;
+  border-radius: var(--rs-radius-pill);
+  background-color: var(--rs-surface-sunken);
 }
 
 .pill-nav-item {
-  border-radius: 999px;
+  border-radius: var(--rs-radius-pill);
   padding: 6px 14px;
-  font-size: 13px;
+  font-size: var(--rs-text-sm);
   line-height: 1.2;
-  color: var(--color-text-secondary);
+  color: var(--rs-ink-500);
 }
 
 .pill-nav-item-active {
-  background-color: var(--color-pill-active);
-  color: #ffffff;
+  background-color: var(--rs-ink-900);
+  color: var(--rs-surface);
+}
+
+/* Tabular numerals for anything that lines up in columns */
+.rs-tabular {
+  font-variant-numeric: tabular-nums;
 }

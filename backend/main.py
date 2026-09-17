@@ -14,6 +14,7 @@ from backend.core.logging import configure_logging, get_request_id, set_request_
 from backend.db.database import SessionLocal
 from backend.api import (
   copilot_routes,
+  dashboard_routes,
   evidence_routes,
   patient_routes,
   report_routes,
@@ -101,6 +102,7 @@ app.include_router(triage_routes.router, dependencies=[Depends(auth_dependency)]
 app.include_router(copilot_routes.router, dependencies=[Depends(auth_dependency)])
 app.include_router(patient_routes.router, dependencies=[Depends(auth_dependency)])
 app.include_router(evidence_routes.router, dependencies=[Depends(auth_dependency)])
+app.include_router(dashboard_routes.router, dependencies=[Depends(auth_dependency)])
 app.include_router(system_routes.router)
 
 
