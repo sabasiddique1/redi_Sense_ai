@@ -76,7 +76,7 @@ export function TopNav({ onOpenCopilot, pathname }: { onOpenCopilot: () => void;
           type="button"
           onClick={() => router.push("/knowledge-center")}
           className="hidden h-8 items-center gap-2 rounded-pill border border-border-hairline bg-surface-sunken px-3 text-xs text-ink-500 hover:text-ink-900 lg:inline-flex"
-          aria-label="Search the Knowledge Center (Command K)"
+          title="Search the Knowledge Center (Command K)"
         >
           <Search className="h-3.5 w-3.5" aria-hidden="true" />
           Search
@@ -96,7 +96,7 @@ export function TopNav({ onOpenCopilot, pathname }: { onOpenCopilot: () => void;
               type="button"
               aria-haspopup="listbox"
               aria-expanded={patientOpen}
-              aria-label={selectedPatient ? `Patient: ${selectedPatient.name}. Change patient` : "Choose patient"}
+              title={selectedPatient ? `Patient context: ${selectedPatient.name}. Click to change` : "Choose patient"}
               onClick={() => setPatientOpen((open) => !open)}
               disabled={patientsLoading || patients.length === 0}
               className="inline-flex h-8 max-w-[260px] items-center gap-2 rounded-pill border border-border-hairline bg-surface px-3 hover:border-border-strong disabled:opacity-60"

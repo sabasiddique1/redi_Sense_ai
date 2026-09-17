@@ -6,7 +6,7 @@ RediSense is a local-first AI clinical copilot for clinicians. It analyses uploa
 
 ## Screenshots
 
-_Placeholders, drop PNGs into `docs/screenshots/` with these names._
+_Captured from the production build at 1440px. Dashboard, Report Analyzer and Copilot in dark mode; the rest in light mode. `docs/screenshots/before/` holds the pre-redesign pages for comparison._
 
 | Dashboard | Report Analyzer | Symptom Triage |
 |---|---|---|
@@ -52,9 +52,11 @@ flowchart LR
 | Timeline | Newest-first events per patient | Mock events |
 | Knowledge Center | Hybrid retrieval over the local evidence index with trace metadata | Mock sources |
 | Copilot drawer | Retrieval-grounded chat with validated citations, DB-backed conversations | Mock replies |
-| Settings | Live non-secret backend config, demo/connected toggle | Same |
+| Settings | Live non-secret backend config, demo/connected toggle, Light/Dark/System appearance | Same |
 
 Demo mode is explicit. In connected mode a failing API call surfaces an error; it never silently swaps in mock data. Toggle it from Settings or with `NEXT_PUBLIC_DEMO_MODE=true`.
+
+The UI follows the Claude Design export in [`design/`](design/): every colour is an `--rs-*` token in [`globals.css`](frontend/app/globals.css) (light on `:root`, dark on `[data-theme="dark"]`), charts are hand-written SVG in [`components/charts/`](frontend/components/charts/), and `npm run check:contrast` verifies 4.5:1 for every text token in both themes.
 
 ## Quickstart
 

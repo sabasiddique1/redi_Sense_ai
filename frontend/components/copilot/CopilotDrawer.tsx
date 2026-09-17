@@ -425,7 +425,8 @@ export function CopilotDrawer({
   const sources = lastAssistant?.citations ?? [];
 
   return (
-    <div className={`absolute inset-0 z-30 transition ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
+    // inert removes the closed drawer from the tab order and the accessibility tree (axe: aria-hidden-focus)
+    <div className={`absolute inset-0 z-30 transition ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open} inert={!open}>
       <div className={`absolute inset-0 bg-ink-900/30 transition-opacity duration-[var(--rs-motion-base)] ${open ? "opacity-100" : "opacity-0"}`} onClick={onClose} />
       <aside
         ref={asideRef}

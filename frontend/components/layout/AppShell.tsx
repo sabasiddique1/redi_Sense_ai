@@ -36,7 +36,8 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <TopNav onOpenCopilot={() => openCopilot()} pathname={pathname || "/"} />
-        <main id="main" className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6" tabIndex={-1}>
+        {/* tabIndex=0: the scroll region must be keyboard-reachable even when a page has no focusable content (axe: scrollable-region-focusable) */}
+        <main id="main" className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6" tabIndex={0}>
           {children}
         </main>
       </div>
