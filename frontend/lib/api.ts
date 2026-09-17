@@ -9,6 +9,8 @@ import type {
   PatientListItem,
   PatientProfileResponse,
   PublicConfigResponse,
+  ReportAnalysisPayload,
+  ReportAnalysisResponse,
   ReportUploadResponse,
   TimelineEventResponse,
   TriageAnalyzePayload,
@@ -318,6 +320,18 @@ export const apiClient = {
   fetchTimeline(patientId: number, options?: FallbackOptions<TimelineEventResponse[]>) {
     return withDemoFallback(
       () => requestJson<TimelineEventResponse[]>(`/api/patient/${patientId}/timeline`),
+      options,
+    );
+  },
+
+  analyzeReportText(payload: ReportAnalysisPayload, options?: FallbackOptions<ReportAnalysisResponse>) {
+    return withDemoFallback(
+      () =>
+        requestJson<ReportAnalysisResponse>("/api/report/analyze", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }),
       options,
     );
   },

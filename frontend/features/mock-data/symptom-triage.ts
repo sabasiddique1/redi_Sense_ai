@@ -18,3 +18,11 @@ export const mockTriageResult = {
   actionDetail:
     "Activate chest pain protocol. Order stat ECG, troponin, CXR. Consider aspirin if no contraindications. Do not send home.",
 };
+
+/** Demo-only contributor weights (design page 02). Connected mode has no source for these yet. */
+export const mockTriageContributors = [
+  { label: "Radiating pain", weight: 90 },
+  { label: "Diaphoresis", weight: 74 },
+  { label: "Elevated BP/HR", weight: 58 },
+  { label: "Cardiac history", weight: 22 },
+];
