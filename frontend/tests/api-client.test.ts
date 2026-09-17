@@ -84,7 +84,7 @@ test("dashboard summary in demo mode returns the fallback without calling the ne
     assert.equal(fetchCalls, 0);
     assert.equal(result.mode, "demo");
     assert.equal(result.data.metrics.length, 4);
-    assert.equal(result.data.reports_queue[0]?.risk, "High");
+    assert.equal(result.data.reports_queue[0]?.risk, "Critical");
     assert.equal(result.warning, "demo snapshot");
   } finally {
     globalThis.fetch = originalFetch;

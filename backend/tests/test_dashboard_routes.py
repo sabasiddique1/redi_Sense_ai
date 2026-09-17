@@ -87,7 +87,7 @@ def _seeded_session(now: datetime) -> FakeSession:
     )
     for index in range(8)
   ]
-  return FakeSession(
+  session = FakeSession(
     patients={1: patient, 2: other},
     reports=reports,
     triage_sessions=triage,
@@ -95,6 +95,14 @@ def _seeded_session(now: datetime) -> FakeSession:
     evidence_documents=[models.EvidenceDocument(id=1, source_key="doc", title="Doc")],
     evidence_chunks=[models.EvidenceChunk(id=1, document_id=1, chunk_index=0, content="x")],
   )
+  session.messages.extend(
+    [
+      models.CopilotMessage(id=40, conversation_id=1, role="assistant", content="a", citations=[{"title": "x"}], created_at=now - timedelta(hours=2)),
+      models.CopilotMessage(id=41, conversation_id=1, role="assistant", content="b", citations=[], created_at=now - timedelta(days=2)),
+      models.CopilotMessage(id=42, conversation_id=1, role="user", content="q", citations=[], created_at=now - timedelta(hours=2)),
+    ]
+  )
+  return session
 
 
 class DashboardSummaryServiceTests(unittest.TestCase):
@@ -104,11 +112,23 @@ class DashboardSummaryServiceTests(unittest.TestCase):
 
     metrics = {metric["id"]: metric for metric in summary["metrics"]}
     self.assertEqual(metrics["reports-today"]["value"], "1")
-    self.assertEqual(metrics["reports-today"]["trend_label"], "3 on record")
+    self.assertEqual(metrics["reports-today"]["footnote"], "3 on record")
+    self.assertEqual(len(metrics["reports-today"]["series"]), 7)
+    self.assertEqual(sum(metrics["reports-today"]["series"]), 3)
     self.assertEqual(metrics["high-risk"]["value"], "1")  # stale High session excluded
-    self.assertEqual(metrics["active-patients"]["value"], "2")
-    self.assertEqual(metrics["active-patients"]["trend_label"], "1 with open alerts")
-    self.assertEqual(metrics["evidence-linked"]["value"], "1")
+    self.assertEqual(metrics["high-risk"]["secondary"], {"value": "1", "label": "critical", "tone": "Critical"})
+    self.assertIsNone(metrics["triage-time"]["value"])  # honest: no duration data
+    self.assertIn("Not available", metrics["triage-time"]["footnote"])
+    self.assertEqual(metrics["evidence-linked"]["value"], "50")  # 1 of 2 assistant answers cited
+    self.assertEqual(metrics["evidence-linked"]["unit"], "%")
+
+    self.assertEqual([b["value"] for b in summary["reports_by_risk"]], [0, 0, 1, 0])
+    self.assertIn("100% of today's reports", summary["reports_by_risk_caption"])
+    self.assertEqual(sorted(m["label"] for m in summary["modality_mix"]), ["CT", "MRI", "US"])
+    self.assertEqual(sum(m["value"] for m in summary["modality_mix"]), 3)
+    self.assertGreaterEqual(len(summary["hourly"]), 1)
+    self.assertEqual(sum(h["value"] for h in summary["hourly"]), 1)
+    self.assertEqual(summary["hourly_target"], 14)
 
     self.assertEqual(
       [bucket["value"] for bucket in summary["risk_distribution"]],
@@ -118,6 +138,9 @@ class DashboardSummaryServiceTests(unittest.TestCase):
     queue = summary["reports_queue"]
     self.assertEqual([row["id"] for row in queue], ["10", "11", "12"])
     self.assertEqual(queue[0]["patient_id"], "MRN 184920")
+    self.assertEqual(queue[0]["mrn"], "184920")
+    self.assertIsNone(queue[0]["confidence"])
+    self.assertGreaterEqual(queue[0]["minutes_in_queue"], 59)
     self.assertEqual(queue[0]["risk"], "High")
     self.assertEqual(queue[1]["modality"], "MRI brain")
     self.assertEqual(queue[1]["risk"], "Critical")
@@ -127,9 +150,13 @@ class DashboardSummaryServiceTests(unittest.TestCase):
     alerts = summary["urgent_alerts"]
     self.assertEqual(alerts[0]["severity"], "Critical")
     self.assertEqual(alerts[0]["patient_name"], "Samir Ali")
+    self.assertGreaterEqual(alerts[0]["elapsed_minutes"], 179)
+    self.assertEqual(alerts[0]["sla_minutes"], 30)
     self.assertEqual(alerts[1]["label"], "Nodule surveillance")
+    self.assertIsNone(alerts[1]["elapsed_minutes"])
 
-    self.assertEqual(len(summary["recent_activity"]), 6)
+    self.assertEqual(len(summary["recent_activity"]), 8)
+    self.assertEqual(summary["recent_activity"][0]["patient_name"], "Lien Nguyen")
     self.assertEqual(summary["recent_activity"][0]["label"], "Event 0")
     self.assertEqual(summary["ai_insight"]["confidence"], 100)
     self.assertEqual(summary["ai_insight"]["record_count"], 6)  # 3 reports + 3 triage sessions
@@ -170,6 +197,11 @@ class DashboardSummaryRouteTests(unittest.TestCase):
     )
     self.assertEqual(payload["reports_queue"][0]["risk"], "High")
     self.assertTrue(payload["reports_queue"][0]["received_at"])
+    self.assertEqual(payload["trend_days"], 7)
+    self.assertEqual(len(payload["metrics"][0]["series"]), 7)
+    self.assertEqual(payload["metrics"][2]["value"], None)
+    self.assertIn("hourly", payload)
+    self.assertIn("modality_mix", payload)
     self.assertEqual(payload["urgent_alerts"][0]["severity"], "Critical")
     self.assertIn("disclaimer", payload)
 

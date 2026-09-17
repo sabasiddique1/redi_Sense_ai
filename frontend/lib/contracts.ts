@@ -395,23 +395,34 @@ export type PublicConfigResponse = {
 
 export type DashboardRiskLevel = "Low" | "Moderate" | "High" | "Critical";
 
+export type DashboardDelta = { direction: "up" | "down" | "flat"; label: string };
+
 export type DashboardMetric = {
   id: string;
   label: string;
-  value: string;
+  /** null = not available in connected mode (see the backend TODO on the field) */
+  value: string | null;
+  unit: string | null;
   trend: "up" | "down" | "neutral";
   trend_label: string;
+  delta: DashboardDelta | null;
+  series: number[] | null;
+  footnote: string | null;
   pill: string | null;
+  secondary: { value: string; label: string; tone: DashboardRiskLevel | null } | null;
 };
 
 export type DashboardReportRow = {
   id: string;
   patient_name: string;
   patient_id: string;
+  mrn: string | null;
   modality: string;
   summary: string;
   risk: DashboardRiskLevel;
+  confidence: number | null;
   received_at: string | null;
+  minutes_in_queue: number | null;
 };
 
 export type DashboardAlert = {
@@ -420,6 +431,8 @@ export type DashboardAlert = {
   patient_name: string;
   detail: string;
   severity: "High" | "Critical";
+  elapsed_minutes: number | null;
+  sla_minutes: number;
 };
 
 export type DashboardInsight = {
@@ -436,6 +449,8 @@ export type DashboardRiskBucket = {
   value: number;
 };
 
+export type DashboardLabelledValue = { label: string; value: number };
+
 export type DashboardActivityItem = {
   id: string;
   timestamp: string | null;
@@ -443,13 +458,23 @@ export type DashboardActivityItem = {
   detail: string;
   event_type: string;
   patient_id: number | null;
+  patient_name: string | null;
 };
 
 export type DashboardSummaryResponse = {
   generated_at: string;
   risk_window_days: number;
+  trend_days: number;
   metrics: DashboardMetric[];
+  reports_by_risk: DashboardRiskBucket[];
+  reports_by_risk_caption: string | null;
+  modality_mix: DashboardLabelledValue[];
+  modality_total: number;
+  hourly: DashboardLabelledValue[];
+  hourly_target: number | null;
+  hourly_caption: string | null;
   reports_queue: DashboardReportRow[];
+  reports_total: number;
   urgent_alerts: DashboardAlert[];
   ai_insight: DashboardInsight;
   risk_distribution: DashboardRiskBucket[];

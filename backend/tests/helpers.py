@@ -148,6 +148,7 @@ class FakeSession:
       models.TimelineEvent: self.timeline_events,
       models.EvidenceDocument: self.evidence_documents,
       models.EvidenceChunk: self.evidence_chunks,
+      models.CopilotMessage: self.messages,
     }
     if model in tables:
       return FakeQuery(tables[model])
