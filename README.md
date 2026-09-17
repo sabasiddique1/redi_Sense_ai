@@ -180,6 +180,10 @@ Alembic migrations live in [`backend/alembic/versions/`](backend/alembic/version
 - Report analysis is extraction-grounded; triage keeps rule-based urgency even when a model tries to downgrade it.
 - Settings surfaces only non-secret runtime metadata.
 
+## Project history
+
+- [September 2026 redesign changelog](docs/CHANGELOG-2026-09-redesign.md): every change from the squashed baseline `938b041` through `feat/ui-redesign` (PR #1): hygiene, backend, tokens and theme, chart kit, pages, quality numbers, deviations and open follow-ups.
+
 ## License
 
 [MIT](LICENSE)
