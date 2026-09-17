@@ -4,7 +4,7 @@ export const mockEvidenceResults = [
     title: "Fleischner Society 2017 — Pulmonary Nodules",
     source: "Radiology. 2017;284(1):228-243",
     summary:
-      "Solid nodules 8–15mm: consider CT at 3–6 months. Nodules &gt;8mm with growth or suspicious features: PET-CT and/or tissue sampling. Spiculation is a high-risk feature.",
+      "Solid nodules 8–15mm: consider CT at 3–6 months. Nodules >8mm with growth or suspicious features: PET-CT and/or tissue sampling. Spiculation is a high-risk feature.",
     usedInAnswer: true,
   },
   {
