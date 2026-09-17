@@ -1,169 +1,193 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { PageHeader } from "../shared/PageHeader";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Building2, Cpu, FileText, Mic } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Cpu, Palette, Plug, ShieldCheck } from "lucide-react";
+
+import { ConfidenceRing } from "@/components/charts/ConfidenceRing";
+import { DonutChart, DonutChartEmpty } from "@/components/charts/DonutChart";
+import { Sparkline, SparklineEmpty } from "@/components/charts/Sparkline";
+import { DataTable, type DataTableColumn } from "@/components/ui/data-table";
+import { SegmentedControl } from "@/components/ui/segmented-control";
+import { ToggleSwitch } from "@/components/ui/toggle-switch";
+import { useTheme, type ThemePreference } from "@/components/providers/ThemeProvider";
 import { useAppState } from "@/hooks/useAppState";
+import { PageHeader } from "../shared/PageHeader";
+
+type ConfigRow = { key: string; value: string; note?: string };
+
+const THEME_OPTIONS: { value: ThemePreference; label: string }[] = [
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+  { value: "system", label: "System" },
+];
+
+const APP_VERSION = "0.1.0";
+const LATENCY_SAMPLES = 8;
 
 export function SettingsPage() {
-  const { apiBaseUrl, demoMode, publicConfig, setDemoMode } = useAppState();
+  const { apiBaseUrl, demoMode, publicConfig, setDemoMode, hydrated } = useAppState();
+  const { preference, setTheme } = useTheme();
+  const [latency, setLatency] = useState<number[]>([]);
+  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [checking, setChecking] = useState(false);
+
+  // Client-measured latency to /health; the backend keeps no latency history.
+  useEffect(() => {
+    if (!hydrated || demoMode) return;
+    let cancelled = false;
+    const probe = async () => {
+      setChecking(true);
+      const samples: number[] = [];
+      for (let i = 0; i < 3; i += 1) {
+        const started = performance.now();
+        try {
+          const response = await fetch(`${apiBaseUrl}/health`, { cache: "no-store" });
+          if (!response.ok) throw new Error(String(response.status));
+          samples.push(Math.round(performance.now() - started));
+        } catch {
+          break;
+        }
+      }
+      if (cancelled) return;
+      setLatency((current) => [...current, ...samples].slice(-LATENCY_SAMPLES));
+      if (samples.length > 0) setLastSync(new Date());
+      setChecking(false);
+    };
+    void probe();
+    return () => {
+      cancelled = true;
+    };
+  }, [apiBaseUrl, demoMode, hydrated]);
+
+  const configRows: ConfigRow[] = publicConfig
+    ? [
+        { key: "Chat model", value: publicConfig.openai_chat_model },
+        { key: "Embedding model", value: publicConfig.openai_embedding_model },
+        { key: "Auth mode", value: publicConfig.auth_enabled ? "Auth0 bearer tokens" : "Dev bypass" },
+        { key: "Backend demo fallback", value: publicConfig.demo_mode_enabled ? "Enabled" : "Disabled" },
+        // TODO(backend): expose chunk size / overlap and minimum citation confidence on /api/system/config.
+        { key: "Chunk size / overlap", value: "Not exposed", note: "server-side setting" },
+        { key: "Minimum citation confidence", value: "Not exposed", note: "server-side setting" },
+      ]
+    : [];
+
+  const columns: DataTableColumn<ConfigRow>[] = [
+    { id: "key", header: "Setting", cell: (row) => <span className="font-medium text-ink-900">{row.key}</span>, width: "40%" },
+    { id: "value", header: "Value", mono: true, cell: (row) => (
+        <span>
+          {row.value}
+          {row.note ? <span className="ml-2 font-sans text-2xs text-ink-400">{row.note}</span> : null}
+        </span>
+      ) },
+  ];
+
+  const latestLatency = latency[latency.length - 1];
+  const syncedAgo = lastSync ? Math.max(0, Math.round((Date.now() - lastSync.getTime()) / 1000)) : null;
 
   return (
     <div className="space-y-5">
-      <PageHeader
-        title="Settings & Integrations"
-        subtitle="Model selection, voice, API keys, EHR/FHIR integration, and audit log."
-      />
+      <PageHeader title="Settings" subtitle="Connection, model configuration, appearance, and data handling." />
 
-      <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Cpu className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold text-text-primary">
-                AI model selection
-              </CardTitle>
-            </div>
-            <p className="text-[11px] text-text-secondary">
-              Connected-mode runtime configuration from the backend.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">Chat model</p>
-              <p className="text-sm font-medium text-text-primary">
-                {publicConfig?.openai_chat_model ?? "Unavailable"}
+      <section className="card-surface p-5" aria-labelledby="settings-connection">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 id="settings-connection" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+              <Plug className="h-4 w-4 text-accent-600" aria-hidden="true" />
+              Connection
+            </h2>
+            <p className="mt-0.5 text-2xs text-ink-500">Connected mode reads live records from the FastAPI backend; demo mode uses curated sample data.</p>
+          </div>
+          <div className="flex items-center gap-5">
+            <div className="w-[120px]">
+              <p className="text-2xs text-ink-500">
+                Latency <span className="font-mono text-ink-700 rs-tabular">{latestLatency != null ? `${latestLatency}ms` : "—"}</span>
               </p>
+              <div className="mt-1 h-6">{latency.length >= 2 ? <Sparkline values={latency} height={24} title="Health-check latency, recent probes" /> : <SparklineEmpty height={24} message={demoMode ? "Demo mode" : "Measuring…"} />}</div>
             </div>
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">Embedding model</p>
-              <p className="text-sm font-medium text-text-primary">
-                {publicConfig?.openai_embedding_model ?? "Unavailable"}
-              </p>
+            <div className="flex items-center gap-2 text-2xs text-ink-500">
+              <ConfidenceRing value={lastSync ? 100 : null} size={34} state={checking ? "loading" : demoMode || lastSync ? "default" : "error"} title="Backend sync" label={lastSync ? "✓" : "–"} />
+              <span>{demoMode ? "Demo, no sync" : lastSync ? `Synced ${syncedAgo}s ago` : "Not reachable"}</span>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Mic className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold text-text-primary">
-                Voice input / output
-              </CardTitle>
+        <div className="mt-4 grid gap-3 sm:grid-cols-[1fr_1.4fr]">
+          <div className="rounded-md bg-surface-sunken px-4 py-3">
+            <p className="text-2xs font-semibold uppercase tracking-[0.05em] text-ink-500">Mode</p>
+            <div className="mt-2">
+              <ToggleSwitch checked={!demoMode} onChange={(connected) => setDemoMode(!connected)} label="Connected mode" labels={["Demo", "Connected"]} />
             </div>
-            <p className="text-[11px] text-text-secondary">
-              Explicit connected versus demo behavior for local development.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-3 pt-0">
-            <div className="flex items-center justify-between rounded-[14px] bg-surface-muted px-4 py-3">
-              <span className="text-sm font-medium text-text-primary">
-                {demoMode ? "Demo mode enabled" : "Connected mode preferred"}
-              </span>
-              <Badge tone={demoMode ? "warning" : "success"}>
-                {demoMode ? "Demo" : "Connected"}
-              </Badge>
-            </div>
-            <Button variant="outline" onClick={() => setDemoMode(!demoMode)}>
-              {demoMode ? "Switch to connected mode" : "Switch to demo mode"}
-            </Button>
-            <p className="text-[11px] text-text-secondary">
-              Connected mode now shows truthful service errors. Demo content appears only when demo mode is enabled explicitly.
-            </p>
-          </CardContent>
-        </Card>
+            <p className="mt-2 text-2xs text-ink-500">Demo uses synthetic patients; Connected reads live records and never falls back to demo data on error.</p>
+          </div>
+          <div className="rounded-md bg-surface-sunken px-4 py-3">
+            <p className="text-2xs font-semibold uppercase tracking-[0.05em] text-ink-500">API base URL</p>
+            <p className="mt-2 font-mono text-xs text-ink-900">{apiBaseUrl}</p>
+            <p className="mt-2 text-2xs text-ink-500">Set NEXT_PUBLIC_API_BASE_URL to change it. Secrets stay on the backend.</p>
+          </div>
+        </div>
+      </section>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Mic className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold text-text-primary">
-                Connection details
-              </CardTitle>
+      <section className="card-surface p-5" aria-labelledby="settings-model">
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_220px]">
+          <div>
+            <h2 id="settings-model" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+              <Cpu className="h-4 w-4 text-accent-600" aria-hidden="true" />
+              Model &amp; RAG configuration
+            </h2>
+            <p className="mt-0.5 text-2xs text-ink-500">Read-only · from /api/system/config</p>
+            <div className="mt-3">
+              <DataTable caption="Runtime configuration" columns={columns} rows={configRows} rowKey={(row) => row.key} zebra emptyMessage={demoMode ? "Demo mode: configuration is read from the backend in connected mode." : "Backend configuration unavailable."} />
             </div>
-            <p className="text-[11px] text-text-secondary">
-              Non-secret runtime information only. Secret keys stay on the backend.
-            </p>
-          </CardHeader>
-          <CardContent className="grid gap-3 pt-0 sm:grid-cols-2">
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">API base URL</p>
-              <p className="text-sm font-medium text-text-primary">{apiBaseUrl}</p>
+          </div>
+          <div>
+            <p className="text-2xs font-semibold uppercase tracking-[0.04em] text-ink-500">Retrieval mix</p>
+            <p className="text-2xs text-ink-400">lexical vs. vector</p>
+            <div className="mt-2">
+              {demoMode ? (
+                <DonutChart segments={[{ label: "Vector", value: 65, color: "var(--rs-data-2)" }, { label: "Lexical", value: 35, color: "var(--rs-data-2)", opacity: 0.35 }]} centerValue="65%" size={100} strokeWidth={12} title="Retrieval mix" />
+              ) : (
+                // TODO(backend): per-query retrieval mode counts are only in rag_trace; no aggregate endpoint exists.
+                <DonutChartEmpty size={100} message="Not available — needs retrieval statistics" />
+              )}
             </div>
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">Auth mode</p>
-              <p className="text-sm font-medium text-text-primary">
-                {publicConfig?.auth_enabled ? "Auth0 enabled" : "Dev bypass"}
-              </p>
-            </div>
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">Backend demo fallback</p>
-              <p className="text-sm font-medium text-text-primary">
-                {publicConfig?.demo_mode_enabled ? "Enabled" : "Disabled"}
-              </p>
-            </div>
-            <div className="rounded-[14px] bg-surface-muted px-4 py-3">
-              <p className="text-[11px] text-text-secondary">Secret key handling</p>
-              <p className="text-sm font-medium text-text-primary">
-                Managed server-side only
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
+      </section>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold text-text-primary">
-                EHR / FHIR integration
-              </CardTitle>
-            </div>
-            <p className="text-[11px] text-text-secondary">
-              Connect to Epic, Cerner, or FHIR-compliant systems.
-            </p>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="flex flex-wrap gap-2">
-              <div className="rounded-[14px] border border-dashed border-border-subtle bg-surface-muted px-4 py-3">
-                <p className="text-xs font-medium text-text-secondary">Epic</p>
-                <p className="text-[11px] text-text-tertiary">Coming soon</p>
-              </div>
-              <div className="rounded-[14px] border border-dashed border-border-subtle bg-surface-muted px-4 py-3">
-                <p className="text-xs font-medium text-text-secondary">Cerner</p>
-                <p className="text-[11px] text-text-tertiary">Coming soon</p>
-              </div>
-              <div className="rounded-[14px] border border-dashed border-border-subtle bg-surface-muted px-4 py-3">
-                <p className="text-xs font-medium text-text-secondary">FHIR endpoint</p>
-                <p className="text-[11px] text-text-tertiary">Coming soon</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      <section className="card-surface p-5" aria-labelledby="settings-appearance">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h2 id="settings-appearance" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+              <Palette className="h-4 w-4 text-accent-600" aria-hidden="true" />
+              Appearance
+            </h2>
+            <p className="mt-0.5 text-2xs text-ink-500">System follows your OS preference. The choice is saved on this device.</p>
+          </div>
+          <SegmentedControl label="Theme" value={preference} onChange={setTheme} options={THEME_OPTIONS} />
+        </div>
+      </section>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
-          <CardHeader className="pb-2">
-            <div className="flex items-center gap-2">
-              <FileText className="h-4 w-4 text-primary" />
-              <CardTitle className="text-sm font-semibold text-text-primary">
-                Audit log
-              </CardTitle>
-            </div>
-            <p className="text-[11px] text-text-secondary">
-              View access and usage history.
-            </p>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="rounded-[14px] bg-surface-muted p-4">
-              <p className="text-xs text-text-tertiary">
-                Audit log placeholder — will show report views, triage runs, and API calls.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <section className="card-surface p-5" aria-labelledby="settings-retention">
+          <h2 id="settings-retention" className="flex items-center gap-2 text-sm font-semibold text-ink-900">
+            <ShieldCheck className="h-4 w-4 text-accent-600" aria-hidden="true" />
+            Data retention
+          </h2>
+          {/* TODO(backend): retention policy is not configurable yet; these rows describe current behaviour. */}
+          <dl className="mt-3 divide-y divide-border-hairline text-xs">
+            <div className="flex justify-between py-2"><dt className="text-ink-700">Copilot conversations</dt><dd className="text-ink-900">Kept until deleted</dd></div>
+            <div className="flex justify-between py-2"><dt className="text-ink-700">Uploaded reports</dt><dd className="text-ink-900">Text stored; files not retained</dd></div>
+            <div className="flex justify-between py-2"><dt className="text-ink-700">Audit log</dt><dd className="text-ink-900">Request ids in server logs only</dd></div>
+          </dl>
+        </section>
+        <section className="card-surface p-5" aria-labelledby="settings-about">
+          <h2 id="settings-about" className="text-sm font-semibold text-ink-900">About</h2>
+          <dl className="mt-3 divide-y divide-border-hairline text-xs">
+            <div className="flex justify-between py-2"><dt className="text-ink-700">Version</dt><dd className="font-mono text-ink-900">{APP_VERSION}</dd></div>
+            <div className="flex justify-between py-2"><dt className="text-ink-700">Deployment</dt><dd className="text-ink-900">Local · FastAPI + Postgres/pgvector</dd></div>
+            <div className="flex justify-between py-2"><dt className="text-ink-700">EHR / FHIR</dt><dd className="text-ink-400">Coming soon</dd></div>
+          </dl>
+        </section>
       </div>
     </div>
   );
