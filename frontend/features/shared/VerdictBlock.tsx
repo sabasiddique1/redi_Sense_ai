@@ -47,7 +47,7 @@ export function VerdictBlock({
       className={cn("overflow-hidden border-l-4 p-0", tone.rail, className)}
     >
       <div className="grid gap-px bg-border-subtle sm:grid-cols-3">
-        <div className="bg-white px-5 py-4">
+        <div className="bg-surface px-5 py-4">
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
             {severityLabel}
           </p>
@@ -62,7 +62,7 @@ export function VerdictBlock({
           ) : null}
         </div>
 
-        <div className="bg-white px-5 py-4">
+        <div className="bg-surface px-5 py-4">
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
             Confidence
           </p>
@@ -74,7 +74,7 @@ export function VerdictBlock({
           ) : null}
         </div>
 
-        <div className={cn("px-5 py-4", escalate ? riskClasses("Critical").soft : "bg-white")}>
+        <div className={cn("px-5 py-4", escalate ? riskClasses("Critical").soft : "bg-surface")}>
           <p className="text-[11px] font-medium uppercase tracking-wide text-text-tertiary">
             Escalation
           </p>
@@ -129,7 +129,7 @@ export function EvidenceChips({
         <Link
           key={item.id}
           href={`/knowledge-center?query=${encodeURIComponent(item.query)}`}
-          className="inline-flex items-center gap-1 rounded-full border border-primary-border bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary-strong transition-colors hover:bg-primary hover:text-white"
+          className="inline-flex items-center gap-1 rounded-full border border-primary-border bg-primary-soft px-2.5 py-1 text-[11px] font-medium text-primary-strong transition-colors hover:bg-primary hover:text-ink-on-accent"
           title={`Search the Knowledge Center for "${item.query}"`}
         >
           {item.label}

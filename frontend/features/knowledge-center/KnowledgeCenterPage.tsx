@@ -185,7 +185,7 @@ export function KnowledgeCenterPage() {
                 className={`rounded-[20px] border shadow-soft ${
                   item.usedInAnswer
                     ? "border-primary bg-primary-soft/50"
-                    : "border-border-subtle bg-white"
+                    : "border-border-subtle bg-surface"
                 }`}
               >
                 <CardHeader className="flex flex-row items-start justify-between gap-2 pb-2">
@@ -193,7 +193,7 @@ export function KnowledgeCenterPage() {
                     {item.title}
                   </CardTitle>
                   {item.usedInAnswer && (
-                    <Badge tone="none" className="bg-primary text-[10px] text-white">
+                    <Badge tone="none" className="bg-primary text-[10px] text-ink-on-accent">
                       Used in this answer
                     </Badge>
                   )}

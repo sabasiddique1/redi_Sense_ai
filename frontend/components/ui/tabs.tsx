@@ -79,7 +79,7 @@ export function TabsTrigger({
       className={cn(
         "px-3.5 py-1.5 text-xs font-medium rounded-full transition-colors",
         active
-          ? "bg-pill-active text-white"
+          ? "bg-pill-active text-surface"
           : "text-text-secondary hover:text-text-primary",
         className
       )}

@@ -1,8 +1,10 @@
 /**
- * Clinical risk scale shared by dashboard cards, triage and report verdicts.
- * Colours come from the --rs-risk-* tokens in app/globals.css.
+ * Clinical severity scale shared by every chip, chart, verdict and table cell.
+ * Colours come from the --rs-severity-* tokens in app/globals.css; each level
+ * also carries a glyph shape so colour is never the only encoding (design rule).
  */
 export type RiskLevel = "Low" | "Moderate" | "High" | "Critical";
+export type SeverityGlyph = "circle" | "triangle" | "diamond" | "octagon";
 
 export const RISK_LEVELS: RiskLevel[] = ["Low", "Moderate", "High", "Critical"];
 
@@ -16,44 +18,78 @@ export function normalizeRiskLevel(value: string | null | undefined): RiskLevel 
   return null;
 }
 
-type RiskClasses = { badge: string; bar: string; dot: string; text: string; soft: string; border: string; rail: string };
+/** 0-based position on the scale, for charts with a categorical y axis. */
+export function riskIndex(level: RiskLevel | null | undefined): number {
+  return level ? RISK_LEVELS.indexOf(level) : 0;
+}
+
+export type RiskClasses = {
+  /** Tinted chip: severity ink on its -bg tint */
+  badge: string;
+  /** Solid fill (bars, dots, rails) */
+  bar: string;
+  dot: string;
+  /** Severity colour as text */
+  text: string;
+  /** Tint background only */
+  soft: string;
+  border: string;
+  /** Left rail for verdict blocks */
+  rail: string;
+  glyph: SeverityGlyph;
+  /** CSS custom property holding the severity colour, for SVG fills/strokes */
+  cssVar: string;
+  cssBgVar: string;
+};
 
 const CLASSES: Record<RiskLevel, RiskClasses> = {
   Low: {
-    badge: "bg-risk-low-soft text-risk-low-text",
-    bar: "bg-risk-low",
-    dot: "bg-risk-low",
-    text: "text-risk-low-text",
-    soft: "bg-risk-low-soft",
-    border: "border-risk-low/30",
-    rail: "border-l-risk-low",
+    badge: "bg-severity-low-bg text-severity-low",
+    bar: "bg-severity-low",
+    dot: "bg-severity-low",
+    text: "text-severity-low",
+    soft: "bg-severity-low-bg",
+    border: "border-severity-low/30",
+    rail: "border-l-severity-low",
+    glyph: "circle",
+    cssVar: "var(--rs-severity-low)",
+    cssBgVar: "var(--rs-severity-low-bg)",
   },
   Moderate: {
-    badge: "bg-risk-moderate-soft text-risk-moderate-text",
-    bar: "bg-risk-moderate",
-    dot: "bg-risk-moderate",
-    text: "text-risk-moderate-text",
-    soft: "bg-risk-moderate-soft",
-    border: "border-risk-moderate/30",
-    rail: "border-l-risk-moderate",
+    badge: "bg-severity-moderate-bg text-severity-moderate",
+    bar: "bg-severity-moderate",
+    dot: "bg-severity-moderate",
+    text: "text-severity-moderate",
+    soft: "bg-severity-moderate-bg",
+    border: "border-severity-moderate/30",
+    rail: "border-l-severity-moderate",
+    glyph: "triangle",
+    cssVar: "var(--rs-severity-moderate)",
+    cssBgVar: "var(--rs-severity-moderate-bg)",
   },
   High: {
-    badge: "bg-risk-high-soft text-risk-high-text",
-    bar: "bg-risk-high",
-    dot: "bg-risk-high",
-    text: "text-risk-high-text",
-    soft: "bg-risk-high-soft",
-    border: "border-risk-high/30",
-    rail: "border-l-risk-high",
+    badge: "bg-severity-high-bg text-severity-high",
+    bar: "bg-severity-high",
+    dot: "bg-severity-high",
+    text: "text-severity-high",
+    soft: "bg-severity-high-bg",
+    border: "border-severity-high/30",
+    rail: "border-l-severity-high",
+    glyph: "diamond",
+    cssVar: "var(--rs-severity-high)",
+    cssBgVar: "var(--rs-severity-high-bg)",
   },
   Critical: {
-    badge: "bg-risk-critical-soft text-risk-critical-text",
-    bar: "bg-risk-critical",
-    dot: "bg-risk-critical",
-    text: "text-risk-critical-text",
-    soft: "bg-risk-critical-soft",
-    border: "border-risk-critical/30",
-    rail: "border-l-risk-critical",
+    badge: "bg-severity-critical-bg text-severity-critical",
+    bar: "bg-severity-critical",
+    dot: "bg-severity-critical",
+    text: "text-severity-critical",
+    soft: "bg-severity-critical-bg",
+    border: "border-severity-critical/30",
+    rail: "border-l-severity-critical",
+    glyph: "octagon",
+    cssVar: "var(--rs-severity-critical)",
+    cssBgVar: "var(--rs-severity-critical-bg)",
   },
 };
 
@@ -61,9 +97,9 @@ export function riskClasses(level: RiskLevel | null | undefined): RiskClasses {
   return CLASSES[level ?? "Low"];
 }
 
-/** Solid badge for the most urgent levels (white text on the risk fill). */
+/** Solid badge for the most urgent levels: contrasting ink on the severity fill. */
 export function riskSolidBadgeClasses(level: RiskLevel): string {
-  return `${CLASSES[level].bar} text-white`;
+  return `${CLASSES[level].bar} text-ink-on-accent`;
 }
 
 export function isEscalationLevel(level: RiskLevel | null | undefined): boolean {

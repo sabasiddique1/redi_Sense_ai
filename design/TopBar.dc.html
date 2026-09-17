@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="tb-search" viewBox="0 0 20 20"><circle cx="8.5" cy="8.5" r="5.5" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="12.5" y1="12.5" x2="17.5" y2="17.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="tb-bell" viewBox="0 0 20 20"><path d="M5 8a5 5 0 0 1 10 0v3.5l1.5 2.5h-13L5 11.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M8 16.5a2 2 0 0 0 4 0" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="tb-chevron" viewBox="0 0 20 20"><polyline points="5,8 10,13 15,8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="tb-plus" viewBox="0 0 20 20"><line x1="10" y1="4" x2="10" y2="16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="4" y1="10" x2="16" y2="10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="tb-copilot" viewBox="0 0 20 20"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3h9A2.5 2.5 0 0 1 17 5.5v6A2.5 2.5 0 0 1 14.5 14H8l-4 3v-3H5.5A2.5 2.5 0 0 1 3 11.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+    <symbol id="tb-alert" viewBox="0 0 20 20"><path d="M10 3 18 16H2z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><line x1="10" y1="8.5" x2="10" y2="12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="10" cy="14" r="0.4" fill="currentColor" stroke="currentColor" stroke-width="1"/></symbol>
+    <symbol id="tb-sun" viewBox="0 0 20 20"><circle cx="10" cy="10" r="4" fill="none" stroke="currentColor" stroke-width="1.6"/><line x1="10" y1="1.5" x2="10" y2="3.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="10" y1="16.5" x2="10" y2="18.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="1.5" y1="10" x2="3.5" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><line x1="16.5" y1="10" x2="18.5" y2="10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></symbol>
+    <symbol id="tb-moon" viewBox="0 0 20 20"><path d="M17 12.5A7 7 0 1 1 7.5 3a5.5 5.5 0 0 0 9.5 9.5z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></symbol>
+  </defs>
+</svg>
+
+<header style="height:64px; flex-shrink:0; display:flex; align-items:center; justify-content:space-between; padding: 0 var(--rs-space-6); background: var(--rs-surface-raised); border-bottom:1px solid var(--rs-border-hairline); font-family: var(--rs-font-sans); gap: var(--rs-space-4);">
+  <div style="flex-shrink:0; min-width:0;">
+    <div style="font-size: var(--rs-text-md); font-weight:700; white-space:nowrap; color: var(--rs-ink-900);">{{ title }}</div>
+    <div style="font-size: var(--rs-text-xs); color: var(--rs-ink-500); white-space:nowrap;">{{ context }}</div>
+  </div>
+  <div style="display:flex; align-items:center; gap: var(--rs-space-3); flex-shrink:0;">
+    <div style="display:flex; align-items:center; gap: var(--rs-space-2); padding: 6px var(--rs-space-3); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-sm); background: var(--rs-surface-sunken); color: var(--rs-ink-400); white-space:nowrap;">
+      <svg width="15" height="15"><use href="#tb-search"></use></svg>
+      <span style="font-size: var(--rs-text-xs);">Search</span>
+      <span style="font-size: var(--rs-text-2xs); font-family: var(--rs-font-mono); border:1px solid var(--rs-border-strong); border-radius: 3px; padding:0 4px;">⌘K</span>
+    </div>
+    <svg width="18" height="18" style="color: var(--rs-ink-500); flex-shrink:0; cursor:pointer;"><use href="{{ themeIcon }}"></use></svg>
+    <svg width="18" height="18" style="color: var(--rs-ink-500); flex-shrink:0;"><use href="#tb-bell"></use></svg>
+
+    <sc-if value="{{ showPatientChip }}" hint-placeholder-val="{{ true }}">
+      <div style="display:flex; align-items:center; gap: var(--rs-space-2); padding: 6px var(--rs-space-3); border:1px solid var(--rs-border-hairline); border-radius: var(--rs-radius-sm); background: var(--rs-surface-sunken); white-space:nowrap;">
+        <span style="{{ riskGlyphStyle }}"></span>
+        <span style="font-size: var(--rs-text-sm); font-weight:600; color: var(--rs-ink-900);">{{ patientName }}</span>
+        <span style="width:1px; height:14px; background: var(--rs-border-strong);"></span>
+        <span style="font-family: var(--rs-font-mono); font-size: var(--rs-text-xs); color: var(--rs-ink-500);">{{ patientMrn }}</span>
+        <span style="width:1px; height:14px; background: var(--rs-border-strong);"></span>
+        <span style="font-size: var(--rs-text-xs); color: var(--rs-ink-500);">{{ patientAgeSex }}</span>
+        <sc-if value="{{ patientAllergy }}" hint-placeholder-val="{{ false }}">
+          <span title="Allergy on file" style="display:flex; align-items:center; color: var(--rs-severity-high);"><svg width="14" height="14"><use href="#tb-alert"></use></svg></span>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <span style="display:inline-flex; align-items:center; gap:6px; padding: 3px 8px; border-radius: var(--rs-radius-pill); border:1px solid var(--rs-border-strong); font-size: var(--rs-text-2xs); color: var(--rs-ink-500); white-space:nowrap;"><span style="width:6px;height:6px;border-radius:50%;background: {{ modeDotColor }}; display:inline-block;"></span>{{ modeLabel }}</span>
+
+    <sc-if value="{{ showPrimaryAction }}" hint-placeholder-val="{{ true }}">
+      <button style="display:flex; align-items:center; gap:6px; padding: 8px var(--rs-space-4); border-radius: var(--rs-radius-sm); border:1px solid var(--rs-border-strong); background: var(--rs-surface-raised); color: var(--rs-ink-900); font-size: var(--rs-text-sm); font-weight:600; cursor:pointer; white-space:nowrap;"><svg width="14" height="14"><use href="#tb-plus"></use></svg>{{ primaryLabel }}</button>
+    </sc-if>
+    <sc-if value="{{ showCopilot }}" hint-placeholder-val="{{ true }}">
+      <button style="display:flex; align-items:center; gap:6px; padding: 8px var(--rs-space-4); border-radius: var(--rs-radius-sm); border:none; background: var(--rs-accent-600); color: white; font-size: var(--rs-text-sm); font-weight:600; cursor:pointer; white-space:nowrap;"><svg width="14" height="14"><use href="#tb-copilot"></use></svg>Copilot</button>
+    </sc-if>
+    <div style="display:flex; align-items:center; gap:4px; cursor:pointer; flex-shrink:0;">
+      <span style="width:28px; height:28px; border-radius:50%; background: var(--rs-accent-100); color: var(--rs-accent-700); display:flex; align-items:center; justify-content:center; font-size: var(--rs-text-xs); font-weight:700;">AR</span>
+      <svg width="14" height="14" style="color: var(--rs-ink-400);"><use href="#tb-chevron"></use></svg>
+    </div>
+  </div>
+</header>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:64},&quot;title&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Dashboard&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;context&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Radiology · 128 studies today · last synced 08:41&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showPatientChip&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;patientName&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Okafor, Daniel&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;patientMrn&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;MRN 0042-8817&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;patientAgeSex&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;58M&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;patientAllergy&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;riskLevel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;low&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;low&quot;,&quot;moderate&quot;,&quot;high&quot;,&quot;critical&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;mode&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;connected&quot;,&quot;options&quot;:[&quot;demo&quot;,&quot;connected&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;showPrimaryAction&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;primaryLabel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;New report&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showCopilot&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const mode = this.props.mode || 'connected';
+    const risk = this.props.riskLevel || 'none';
+    const glyphs = {
+      low: 'width:9px;height:9px;border-radius:50%;background:var(--rs-severity-low);display:inline-block;flex-shrink:0;',
+      moderate: 'width:10px;height:10px;background:var(--rs-severity-moderate);display:inline-block;flex-shrink:0;clip-path:polygon(50% 0%,100% 100%,0% 100%);',
+      high: 'width:9px;height:9px;background:var(--rs-severity-high);display:inline-block;flex-shrink:0;transform:rotate(45deg);',
+      critical: 'width:10px;height:10px;background:var(--rs-severity-critical);display:inline-block;flex-shrink:0;clip-path:polygon(30% 0%,70% 0%,100% 30%,100% 70%,70% 100%,30% 100%,0% 70%,0% 30%);',
+      none: 'display:none;',
+    };
+    const theme = this.props.theme || 'light';
+    return {
+      riskGlyphStyle: glyphs[risk] || glyphs.none,
+      themeIcon: theme === 'dark' ? '#tb-moon' : '#tb-sun',
+      title: this.props.title || 'Dashboard',
+      context: this.props.context || '',
+      showPatientChip: this.props.showPatientChip !== false,
+      patientName: this.props.patientName || 'Okafor, Daniel',
+      patientMrn: this.props.patientMrn || 'MRN 0042-8817',
+      patientAgeSex: this.props.patientAgeSex || '58M',
+      patientAllergy: !!this.props.patientAllergy,
+      modeLabel: mode === 'demo' ? 'DEMO' : 'CONNECTED',
+      modeDotColor: mode === 'demo' ? 'var(--rs-ink-300)' : 'var(--rs-accent-500)',
+      showPrimaryAction: this.props.showPrimaryAction !== false,
+      primaryLabel: this.props.primaryLabel || 'New report',
+      showCopilot: this.props.showCopilot !== false,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

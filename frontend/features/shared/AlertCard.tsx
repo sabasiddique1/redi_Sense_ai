@@ -13,7 +13,7 @@ export interface UrgentAlert {
 
 export function AlertCard({ alerts }: { alerts: UrgentAlert[] }) {
   return (
-    <Card className="flex max-h-[240px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+    <Card className="flex max-h-[240px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
       <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

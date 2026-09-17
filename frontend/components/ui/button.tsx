@@ -23,12 +23,12 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-primary text-white hover:bg-primary-hover shadow-[0_16px_30px_rgba(76,141,255,0.28)]",
+    "bg-primary text-ink-on-accent hover:bg-primary-hover ",
   ghost:
     "bg-transparent text-text-primary hover:bg-primary-soft border border-transparent",
   outline:
-    "bg-white text-text-primary border border-border-subtle hover:bg-surface-muted",
-  pill: "rounded-full bg-pill-active text-white hover:bg-black",
+    "bg-surface text-text-primary border border-border-subtle hover:bg-surface-muted",
+  pill: "rounded-full bg-pill-active text-surface hover:bg-ink-700",
 };
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -41,7 +41,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {...props}
       >
         {loading && (
-          <span className="h-3 w-3 rounded-full border-2 border-white border-t-transparent animate-spin" />
+          <span className="h-3 w-3 rounded-full border-2 border-surface border-t-transparent animate-spin" />
         )}
         {children}
       </button>

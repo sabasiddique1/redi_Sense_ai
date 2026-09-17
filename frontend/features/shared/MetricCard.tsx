@@ -31,7 +31,7 @@ export function MetricCard({ metric }: { metric: Metric }) {
       : "text-text-secondary";
 
   return (
-    <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+    <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
       <CardHeader className="p-0 pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

@@ -384,7 +384,7 @@ export function CopilotDrawer({
         onClick={onClose}
       />
       <aside
-        className={`absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col border-l border-border-subtle bg-white shadow-[-18px_0_45px_rgba(15,23,42,0.08)] transition-transform ${
+        className={`absolute inset-y-0 right-0 flex w-full max-w-[440px] flex-col border-l border-border-subtle bg-surface shadow-elevation-2 transition-transform ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
@@ -425,7 +425,7 @@ export function CopilotDrawer({
                     className={`flex max-w-[240px] shrink-0 items-center gap-1 rounded-full border px-2 py-1 ${
                       active
                         ? "border-primary-border bg-primary-soft text-primary-strong"
-                        : "border-border-subtle bg-white text-text-secondary"
+                        : "border-border-subtle bg-surface text-text-secondary"
                     }`}
                   >
                     <button
@@ -437,7 +437,7 @@ export function CopilotDrawer({
                     </button>
                     <button
                       type="button"
-                      className="rounded-full p-1 transition-colors hover:bg-white/80 hover:text-text-primary"
+                      className="rounded-full p-1 transition-colors hover:bg-surface/80 hover:text-text-primary"
                       onClick={(event) => {
                         event.stopPropagation();
                         handleCloseConversation(tab.id);
@@ -513,7 +513,7 @@ export function CopilotDrawer({
                   {message.citations.map((citation) => (
                     <div
                       key={`${message.id}-${citation.title}`}
-                      className="rounded-[14px] border border-border-subtle bg-white px-3 py-2 text-xs text-text-secondary"
+                      className="rounded-[14px] border border-border-subtle bg-surface px-3 py-2 text-xs text-text-secondary"
                     >
                       <p className="font-medium text-text-primary">{citation.title}</p>
                       <p>

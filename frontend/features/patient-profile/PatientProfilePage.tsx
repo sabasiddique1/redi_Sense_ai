@@ -178,7 +178,7 @@ export function PatientProfilePage() {
       <div className="grid gap-5 lg:grid-cols-12">
         {/* Main content */}
         <div className="space-y-4 lg:col-span-8">
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardContent className="flex items-center gap-4 p-5">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-2xl font-semibold text-primary">
                   <User className="h-8 w-8" />
@@ -213,7 +213,7 @@ export function PatientProfilePage() {
                   onClick={() => setActiveTab(tab)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                     activeTab === tab
-                      ? "bg-pill-active text-white"
+                      ? "bg-pill-active text-surface"
                       : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
@@ -223,7 +223,7 @@ export function PatientProfilePage() {
             </div>
 
             {activeTab === "overview" && (
-            <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+            <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
                 <div className="grid gap-4 sm:grid-cols-2">
                   {Object.entries(displayedPatient.overview).map(([k, v]) => (
                     <div key={k} className="rounded-[14px] bg-surface-muted px-3 py-2">
@@ -235,7 +235,7 @@ export function PatientProfilePage() {
               </Card>
             )}
             {activeTab === "reports" && (
-              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+              <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
                 <ul className="space-y-2">
                   {displayedPatient.reports.map((r) => (
                     <li
@@ -252,7 +252,7 @@ export function PatientProfilePage() {
               </Card>
             )}
             {activeTab === "medications" && (
-              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+              <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
                 <ul className="space-y-2">
                   {displayedPatient.medications.map((m) => (
                     <li
@@ -266,12 +266,12 @@ export function PatientProfilePage() {
               </Card>
             )}
             {activeTab === "history" && (
-              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+              <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
                 <p className="text-xs text-text-secondary">{displayedPatient.history}</p>
               </Card>
             )}
             {activeTab === "ai-notes" && (
-              <Card className="rounded-[20px] border border-border-subtle bg-white p-5 shadow-soft">
+              <Card className="rounded-[20px] border border-border-subtle bg-surface p-5 shadow-soft">
                 <p className="text-xs text-text-secondary">{displayedPatient.aiNotes}</p>
               </Card>
             )}
@@ -280,7 +280,7 @@ export function PatientProfilePage() {
 
         {/* Sidebar: Alerts + Tasks */}
         <div className="space-y-4 lg:col-span-4">
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <AlertTriangle className="h-4 w-4 text-danger" />
@@ -305,7 +305,7 @@ export function PatientProfilePage() {
             </CardContent>
           </Card>
 
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-4 w-4 text-primary" />

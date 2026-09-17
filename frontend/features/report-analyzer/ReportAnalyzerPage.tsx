@@ -280,7 +280,7 @@ export function ReportAnalyzerPage() {
       <div className="grid gap-5 lg:grid-cols-12">
         {/* Left: Upload + Preview */}
         <div className="space-y-4 lg:col-span-4">
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Upload className="h-4 w-4 text-primary" />
@@ -333,7 +333,7 @@ export function ReportAnalyzerPage() {
             </CardContent>
           </Card>
 
-          <Card className="flex max-h-[280px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="flex max-h-[280px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="shrink-0 pb-2">
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary" />
@@ -394,7 +394,7 @@ export function ReportAnalyzerPage() {
         <>
         {/* Center: AI Analysis */}
         <div className="space-y-4 lg:col-span-5">
-          <Card className="flex max-h-[380px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="flex max-h-[380px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="shrink-0 flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-primary" />
@@ -479,7 +479,7 @@ export function ReportAnalyzerPage() {
                   onClick={() => setActiveTab(tab)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-medium transition-colors ${
                     activeTab === tab
-                      ? "bg-pill-active text-white"
+                      ? "bg-pill-active text-surface"
                       : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
@@ -487,7 +487,7 @@ export function ReportAnalyzerPage() {
                 </button>
               ))}
             </div>
-            <Card className="flex max-h-[200px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+            <Card className="flex max-h-[200px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
               <div className="min-h-0 flex-1 overflow-y-auto p-5">
                 {activeTab === "summary" && (
                   <p className="text-xs leading-relaxed text-text-secondary">
@@ -516,7 +516,7 @@ export function ReportAnalyzerPage() {
 
         {/* Right: Urgency + Next steps + Evidence */}
         <div className="space-y-4 lg:col-span-3">
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 text-danger" />
@@ -553,7 +553,7 @@ export function ReportAnalyzerPage() {
             </CardContent>
           </Card>
 
-          <Card className="flex max-h-[240px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="flex max-h-[240px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="shrink-0 pb-2">
               <div className="flex items-center gap-2">
                 <ListChecks className="h-4 w-4 text-primary" />
@@ -575,7 +575,7 @@ export function ReportAnalyzerPage() {
             </CardContent>
           </Card>
 
-            <Card className="flex max-h-[260px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+            <Card className="flex max-h-[260px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="shrink-0 pb-2">
               <div className="flex items-center gap-2">
                 <BookOpen className="h-4 w-4 text-primary" />

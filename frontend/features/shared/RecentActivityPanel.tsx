@@ -14,7 +14,7 @@ export function RecentActivityPanel({
   items: RecentActivityItem[];
 }) {
   return (
-    <Card className="flex max-h-[260px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+    <Card className="flex max-h-[260px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
       <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center gap-2">
           <Activity className="h-4 w-4 shrink-0 text-primary" />

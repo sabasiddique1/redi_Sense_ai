@@ -56,7 +56,7 @@ export function ErrorState({
         className,
       )}
     >
-      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-white text-risk-critical-text">
+      <span className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-surface text-risk-critical-text">
         <AlertOctagon className="h-5 w-5" />
       </span>
       <p className="text-sm font-semibold text-risk-critical-text">{title}</p>

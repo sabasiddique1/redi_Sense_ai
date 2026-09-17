@@ -15,7 +15,7 @@ export interface ReportRow {
 
 export function ReportsTable({ reports }: { reports: ReportRow[] }) {
   return (
-    <Card className="flex max-h-[320px] flex-col rounded-[20px] border border-border-subtle bg-white shadow-soft">
+    <Card className="flex max-h-[320px] flex-col rounded-[20px] border border-border-subtle bg-surface shadow-soft">
       <CardHeader className="shrink-0 pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -33,7 +33,7 @@ export function ReportsTable({ reports }: { reports: ReportRow[] }) {
         </div>
       </CardHeader>
       <CardContent className="min-h-0 flex-1 overflow-hidden pt-0">
-        <div className="h-full max-h-[220px] overflow-y-auto rounded-[16px] border border-border-subtle bg-white">
+        <div className="h-full max-h-[220px] overflow-y-auto rounded-[16px] border border-border-subtle bg-surface">
           <table className="min-w-full border-collapse text-xs">
             <thead className="bg-surface-muted">
               <tr className="text-[11px] text-text-secondary">

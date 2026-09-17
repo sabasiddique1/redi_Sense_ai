@@ -75,7 +75,7 @@ export function Sidebar({
           variant="ghost"
           size="icon"
           aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
-          className="h-8 w-8 rounded-full border border-border-subtle bg-white shadow-sm"
+          className="h-8 w-8 rounded-full border border-border-subtle bg-surface shadow-sm"
           onClick={onToggle}
         >
           {expanded ? (
@@ -100,7 +100,7 @@ export function Sidebar({
               className={cn(
                 "group flex w-full items-center rounded-[999px] px-3 py-2 text-left text-xs font-medium transition-colors",
                 active
-                  ? "bg-pill-active text-white shadow-[0_10px_25px_rgba(15,23,42,0.35)]"
+                  ? "bg-pill-active text-surface "
                   : "text-text-secondary hover:bg-surface-subtle hover:text-text-primary"
               )}
             >
@@ -111,7 +111,7 @@ export function Sidebar({
                     className={cn(
                       "mr-2 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border shadow-sm",
                       active
-                        ? "border-transparent bg-white text-primary"
+                        ? "border-transparent bg-surface text-primary"
                         : "border-border-subtle bg-surface-muted text-text-secondary"
                     )}
                   >

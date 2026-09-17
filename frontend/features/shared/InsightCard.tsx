@@ -13,7 +13,7 @@ export interface Insight {
 
 export function InsightCard({ insight }: { insight: Insight }) {
   return (
-    <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+    <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
       <CardHeader className="pb-2">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">

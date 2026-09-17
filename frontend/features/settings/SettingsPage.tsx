@@ -18,7 +18,7 @@ export function SettingsPage() {
       />
 
       <div className="grid gap-5 lg:grid-cols-2">
-        <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Cpu className="h-4 w-4 text-primary" />
@@ -46,7 +46,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Mic className="h-4 w-4 text-primary" />
@@ -76,7 +76,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft lg:col-span-2">
+        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Mic className="h-4 w-4 text-primary" />
@@ -114,7 +114,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft lg:col-span-2">
+        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <Building2 className="h-4 w-4 text-primary" />
@@ -144,7 +144,7 @@ export function SettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft lg:col-span-2">
+        <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft lg:col-span-2">
           <CardHeader className="pb-2">
             <div className="flex items-center gap-2">
               <FileText className="h-4 w-4 text-primary" />

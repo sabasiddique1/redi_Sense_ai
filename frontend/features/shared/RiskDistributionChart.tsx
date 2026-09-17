@@ -19,7 +19,7 @@ export function RiskDistributionChart({
   const total = distribution.reduce((sum, b) => sum + b.value, 0) || 1;
 
   return (
-    <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+    <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <PieChart className="h-4 w-4 shrink-0 text-primary" />
@@ -44,7 +44,7 @@ export function RiskDistributionChart({
           {distribution.map((bucket) => (
             <div key={bucket.label} className="flex items-center gap-1.5">
               <span
-                className={`h-2.5 w-2.5 rounded-full border border-white shadow-sm ${bucket.color}`}
+                className={`h-2.5 w-2.5 rounded-full border border-surface shadow-sm ${bucket.color}`}
               />
               <span className="text-[11px] text-text-secondary">
                 {bucket.label}{" "}

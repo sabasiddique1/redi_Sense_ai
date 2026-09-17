@@ -407,7 +407,7 @@ function ToggleGroup<T extends string>({
             type="button"
             size="sm"
             variant={selected ? "primary" : "outline"}
-            className={selected ? "" : "bg-white"}
+            className={selected ? "" : "bg-surface"}
             onClick={() => onToggle(option.value)}
           >
             {option.label}
@@ -437,7 +437,7 @@ function SingleSelectGroup<T extends string>({
             type="button"
             size="sm"
             variant={selected ? "primary" : "outline"}
-            className={selected ? "" : "bg-white"}
+            className={selected ? "" : "bg-surface"}
             onClick={() => onSelect(option.value)}
           >
             {option.label}
@@ -571,7 +571,7 @@ export function SymptomTriagePage() {
 
       <div className="grid gap-5 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+          <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <Stethoscope className="h-4 w-4 text-primary" />
@@ -740,7 +740,7 @@ export function SymptomTriagePage() {
                       type="button"
                       size="sm"
                       variant={triageDraft.noRedFlags ? "primary" : "outline"}
-                      className={triageDraft.noRedFlags ? "" : "bg-white"}
+                      className={triageDraft.noRedFlags ? "" : "bg-surface"}
                       onClick={() =>
                         updateDraft({
                           noRedFlags: !triageDraft.noRedFlags,
@@ -898,7 +898,7 @@ export function SymptomTriagePage() {
                   items={result.differential.map((item) => ({ id: item, label: item, query: item }))}
                 />
               ) : null}
-              <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+              <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
                 <CardHeader className="flex flex-row items-center justify-between gap-3 pb-2">
                   <div className="flex items-center gap-2">
                     <Stethoscope className="h-4 w-4 text-primary" />
@@ -956,7 +956,7 @@ export function SymptomTriagePage() {
               </Card>
 
               {!result.invalidInput && result.reasoning.length > 0 ? (
-                <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+                <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
                       <ArrowRight className="h-4 w-4 text-primary" />
@@ -992,7 +992,7 @@ export function SymptomTriagePage() {
                     {result.redFlags.map((flag) => (
                       <div
                         key={flag}
-                        className="flex items-center gap-2 rounded-[14px] bg-white/80 px-3 py-2"
+                        className="flex items-center gap-2 rounded-[14px] bg-surface/80 px-3 py-2"
                       >
                         <span className="text-risk-critical">⚠</span>
                         <p className="text-xs text-risk-critical-text">{flag}</p>
@@ -1003,7 +1003,7 @@ export function SymptomTriagePage() {
               ) : null}
 
               {!result.invalidInput ? (
-                <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+                <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
                   <CardHeader className="pb-2">
                     <div className="flex items-center gap-2">
                       <ArrowRight className="h-4 w-4 text-primary" />
@@ -1027,7 +1027,7 @@ export function SymptomTriagePage() {
               <p className="text-[11px] text-text-secondary">{result.disclaimer}</p>
             </>
           ) : (
-            <Card className="rounded-[20px] border border-border-subtle bg-white p-12 text-center shadow-soft">
+            <Card className="rounded-[20px] border border-border-subtle bg-surface p-12 text-center shadow-soft">
               <p className="text-sm text-text-tertiary">
                 Enter structured symptom details and click &quot;Analyze triage&quot; to see results.
               </p>

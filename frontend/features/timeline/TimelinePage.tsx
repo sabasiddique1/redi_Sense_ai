@@ -175,7 +175,7 @@ export function TimelinePage() {
             <div className="space-y-4">
               {visibleEvents.map((event) => (
                 <div key={event.id} className="relative flex gap-4">
-                  <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-white bg-primary text-white shadow-[0_2px_8px_rgba(76,141,255,0.3)]">
+                  <div className="relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 border-surface bg-primary text-ink-on-accent ">
                     {EVENT_ICONS[event.type] ? (
                       (() => {
                         const Icon = EVENT_ICONS[event.type];
@@ -186,7 +186,7 @@ export function TimelinePage() {
                     )}
                   </div>
                   <div className="flex-1 pb-4">
-                    <Card className="rounded-[20px] border border-border-subtle bg-white shadow-soft">
+                    <Card className="rounded-[20px] border border-border-subtle bg-surface shadow-soft">
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between gap-2">
                           <span className="text-[11px] text-text-tertiary">
