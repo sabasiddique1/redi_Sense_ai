@@ -25,6 +25,8 @@ const TRIAGE_STATE_KEY = "redisense-triage-state";
 const LEGACY_DEMO_MODE_KEY = "reportiq-demo-mode";
 const LEGACY_SELECTED_PATIENT_KEY = "reportiq-selected-patient";
 const LEGACY_TRIAGE_STATE_KEY = "reportiq-triage-state";
+const SIDEBAR_KEY = "redisense-sidebar-collapsed";
+const LEGACY_SIDEBAR_KEY = "reportiq-sidebar-collapsed";
 
 type SavedTriageState = {
   draft: TriageDraft;
@@ -189,6 +191,12 @@ type AppStateContextValue = {
   openCopilot: (prefill?: string) => void;
   closeCopilot: () => void;
   clearCopilotPrefill: () => void;
+  /** Page title + context rendered by the top bar (pages register via <PageHeader>). */
+  pageHeader: { title: string; context?: string } | null;
+  setPageHeader: (header: { title: string; context?: string } | null) => void;
+  /** Manual sidebar collapse, persisted per browser. */
+  sidebarCollapsed: boolean;
+  setSidebarCollapsed: (collapsed: boolean) => void;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -221,12 +229,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [lastActivityMessage, setLastActivityMessage] = useState<string | null>(null);
   const [copilotOpen, setCopilotOpen] = useState(false);
   const [copilotPrefill, setCopilotPrefill] = useState<string | null>(null);
+  const [pageHeader, setPageHeader] = useState<{ title: string; context?: string } | null>(null);
+  const [sidebarCollapsed, setSidebarCollapsedState] = useState(false);
   const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>({});
 
   useEffect(() => {
     setDemoModeState(readStoredDemoMode());
     setSelectedPatientIdState(readStoredPatientId());
     setTriageStates(readStoredTriageStates());
+    setSidebarCollapsedState(readStorageWithLegacyFallback(window.localStorage, SIDEBAR_KEY, LEGACY_SIDEBAR_KEY) === "true");
     setHydrated(true);
   }, []);
 
@@ -364,6 +375,15 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     updateCurrentTriageState((state) => ({ ...state, timelineMessage: value }));
   };
 
+  const setSidebarCollapsed = (collapsed: boolean) => {
+    setSidebarCollapsedState(collapsed);
+    try {
+      window.localStorage.setItem(SIDEBAR_KEY, String(collapsed));
+    } catch {
+      // storage unavailable
+    }
+  };
+
   const openCopilot = (prefill?: string) => {
     if (prefill) setCopilotPrefill(prefill);
     setCopilotOpen(true);
@@ -408,6 +428,10 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         openCopilot,
         closeCopilot,
         clearCopilotPrefill,
+        pageHeader,
+        setPageHeader,
+        sidebarCollapsed,
+        setSidebarCollapsed,
       }}
     >
       {children}

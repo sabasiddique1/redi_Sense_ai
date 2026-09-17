@@ -432,7 +432,7 @@ export function CopilotDrawer({
         role="dialog"
         aria-modal="true"
         aria-label="Copilot"
-        className={`absolute inset-y-0 right-0 flex w-full max-w-[420px] flex-col border-l border-border-hairline bg-surface-raised shadow-elevation-2 transition-transform duration-[var(--rs-motion-base)] ease-[var(--rs-motion-ease)] ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`absolute inset-y-0 right-0 flex w-full flex-col lg:max-w-[420px] border-l border-border-hairline bg-surface-raised shadow-elevation-2 transition-transform duration-[var(--rs-motion-base)] ease-[var(--rs-motion-ease)] ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex items-center justify-between border-b border-border-hairline px-5 py-3">
           <h3 className="flex items-center gap-2 text-sm font-semibold text-ink-900">

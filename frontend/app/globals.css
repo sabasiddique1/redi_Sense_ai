@@ -174,6 +174,9 @@
  * the design names (accent-600, ink-500, severity-*).
  */
 @theme inline {
+  /* Design breakpoint: at 1024px and below, pages stack and the sidebar becomes a 64px rail */
+  --breakpoint-lg: 1025px;
+
   --font-sans: var(--rs-font-sans);
   --font-mono: var(--rs-font-mono);
 
@@ -348,12 +351,6 @@ html[data-theme] .card-surface {
   background-image:
     repeating-linear-gradient(0deg, var(--rs-grid-line) 0 1px, transparent 1px var(--rs-grid-size)),
     repeating-linear-gradient(90deg, var(--rs-grid-line) 0 1px, transparent 1px var(--rs-grid-size));
-}
-
-/* Rounded app container: always full viewport height, content scrolls inside */
-.app-shell-inner {
-  height: calc(100vh - 2rem) !important;
-  min-height: calc(100vh - 2rem) !important;
 }
 
 /* Flat skeleton block: the design forbids shimmer gradients on loading states */
