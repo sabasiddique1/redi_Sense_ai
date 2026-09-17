@@ -80,6 +80,7 @@ export function TopNav({ onOpenCopilot }: { onOpenCopilot: () => void }) {
           variant="primary"
           size="sm"
           className="rounded-[14px] gap-1.5"
+          data-copilot-trigger
           onClick={onOpenCopilot}
         >
           <Bot className="h-4 w-4" />

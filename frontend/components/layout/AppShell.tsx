@@ -19,10 +19,9 @@ const NAV_ITEMS = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [expanded, setExpanded] = useState(true);
-  const [copilotOpen, setCopilotOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAppState();
+  const { user, copilotOpen, openCopilot, closeCopilot } = useAppState();
 
   return (
     <div className="app-shell flex h-screen w-full overflow-hidden px-4 py-4 sm:px-6 sm:py-6">
@@ -36,12 +35,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onNavigate={(href) => router.push(href)}
         />
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-          <TopNav onOpenCopilot={() => setCopilotOpen(true)} />
+          <TopNav onOpenCopilot={() => openCopilot()} />
           <main className="min-h-0 flex-1 overflow-y-auto px-6 pb-8 pt-6">
             {children}
           </main>
         </div>
-        <CopilotDrawer open={copilotOpen} onClose={() => setCopilotOpen(false)} />
+        <CopilotDrawer open={copilotOpen} onClose={closeCopilot} />
       </div>
     </div>
   );

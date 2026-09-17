@@ -183,6 +183,12 @@ type AppStateContextValue = {
   triageTimelineMessage: string | null;
   setTriageTimelineMessage: (value: string | null) => void;
   notifyPatientActivity: (message: string, patientId?: number | null) => void;
+  /** Copilot drawer is global (opened from the top bar and from evidence cards). */
+  copilotOpen: boolean;
+  copilotPrefill: string | null;
+  openCopilot: (prefill?: string) => void;
+  closeCopilot: () => void;
+  clearCopilotPrefill: () => void;
 };
 
 const AppStateContext = createContext<AppStateContextValue | null>(null);
@@ -213,6 +219,8 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [publicConfig, setPublicConfig] = useState<PublicConfigResponse | null>(null);
   const [activityVersion, setActivityVersion] = useState(0);
   const [lastActivityMessage, setLastActivityMessage] = useState<string | null>(null);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+  const [copilotPrefill, setCopilotPrefill] = useState<string | null>(null);
   const [triageStates, setTriageStates] = useState<Record<string, SavedTriageState>>({});
 
   useEffect(() => {
@@ -356,6 +364,13 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
     updateCurrentTriageState((state) => ({ ...state, timelineMessage: value }));
   };
 
+  const openCopilot = (prefill?: string) => {
+    if (prefill) setCopilotPrefill(prefill);
+    setCopilotOpen(true);
+  };
+  const closeCopilot = () => setCopilotOpen(false);
+  const clearCopilotPrefill = () => setCopilotPrefill(null);
+
   const notifyPatientActivity = (message: string, patientId?: number | null) => {
     setLastActivityMessage(message);
     setActivityVersion((current) => current + 1);
@@ -388,6 +403,11 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
         triageTimelineMessage: currentTriageState.timelineMessage,
         setTriageTimelineMessage,
         notifyPatientActivity,
+        copilotOpen,
+        copilotPrefill,
+        openCopilot,
+        closeCopilot,
+        clearCopilotPrefill,
       }}
     >
       {children}
